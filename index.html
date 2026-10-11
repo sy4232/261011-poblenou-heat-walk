@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Poblenou Heat Walk</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+:root{
+  --panel:rgba(18,22,30,.86); --panel2:rgba(34,40,52,.94); --ink:#f2f4f8; --mute:#aab3c2;
+  --line:rgba(255,255,255,.14); --acc:#ffb347; --good:#6fd3a0; --warm:#ff8a7a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#0b0e14;color:var(--ink);
+  font:14px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+#gl.drag{cursor:grabbing} #gl.pick{cursor:crosshair}
+.panel{position:fixed;background:var(--panel);border:1px solid var(--line);border-radius:12px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.btn{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 11px;font:inherit;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:rgba(255,255,255,.45)} .btn:disabled{opacity:.4;cursor:not-allowed}
+.seg{display:inline-flex;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:2px;gap:2px}
+.seg button{background:none;border:0;color:var(--ink);font:inherit;padding:6px 10px;border-radius:7px;cursor:pointer;white-space:nowrap}
+.seg button.on{background:#ffe2b0;color:#1a1300;font-weight:600}
+select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 6px;font:inherit}
+/* top-left card */
+#card{top:12px;left:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;max-width:min(430px,calc(100% - 200px))}
+#card h1{font-size:16px;margin:0;font-weight:650;display:flex;align-items:center;gap:10px;justify-content:space-between}
+#card .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+/* top-right */
+#tr{position:fixed;top:12px;right:12px;display:flex;gap:6px}
+/* info card */
+#infoCard{top:58px;right:12px;width:300px;padding:12px 14px;display:none;overflow:auto}
+#infoCard .x{position:absolute;right:6px;top:4px;background:none;border:0;color:var(--mute);font-size:20px;cursor:pointer}
+#infoCard .where{font-size:12px;color:var(--mute);padding-right:20px}
+#infoBig{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums}
+.cls{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12.5px;font-weight:600;color:#111;margin-left:8px;vertical-align:middle}
+#infoSub{font-size:12px;color:var(--mute)}
+#infoCmp{margin-top:6px;font-size:13.5px} .cool{color:var(--good);font-weight:600} .warm{color:var(--warm);font-weight:600}
+#infoMore{margin-top:8px} #infoMore summary{cursor:pointer;color:var(--mute);font-size:12.5px}
+#infoMore table{width:100%;border-collapse:collapse;margin:6px 0;font-variant-numeric:tabular-nums;font-size:13px}
+#infoMore td{padding:2px 0;border-bottom:1px solid var(--line)} #infoMore td:last-child{text-align:right}
+#chart{width:100%;height:140px;display:block;margin-top:6px} #chartnote{font-size:11px;color:var(--mute)}
+#pin{position:fixed;width:16px;height:16px;margin:-16px 0 0 -8px;pointer-events:none;display:none;z-index:3}
+/* bottom: legend + time bar */
+#bottom{left:12px;right:12px;bottom:12px;padding:8px 12px;display:flex;flex-direction:column;gap:6px}
+#legend{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--mute)}
+#legT{color:var(--ink);font-weight:600;white-space:nowrap}
+#legBarWrap{flex:1;min-width:160px;max-width:520px}
+#legcv{width:100%;height:10px;border-radius:3px;display:block}
+#legTicks{position:relative;height:13px;font-size:10.5px}
+#legTicks span{position:absolute;transform:translateX(-50%)}
+#legCls{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:330px}
+#legSrc{font-size:10.5px;flex:1;min-width:120px;text-align:right}
+#timebar{display:flex;align-items:center;gap:14px}
+#clock{font-size:24px;font-weight:650;min-width:78px;font-variant-numeric:tabular-nums;line-height:1.05}
+#clock small{display:block;font-size:10.5px;color:var(--mute);font-weight:400}
+#time{flex:1;accent-color:var(--acc);height:26px}
+#sunline{font-size:12px;color:var(--mute);min-width:128px;text-align:right}
+/* layers button + popover (bottom-left) */
+#layersBtn{position:fixed;left:12px;width:64px;height:64px;border-radius:12px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px}
+#layersPop{left:12px;width:330px;padding:12px;display:none;z-index:6}
+#layersPop h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:2px 0 6px;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.chip{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:99px;padding:5px 10px;font:inherit;font-size:12.5px;cursor:pointer}
+.chip.on{background:#ffe2b0;color:#1a1300;border-color:#ffe2b0;font-weight:600}
+#opRow{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mute);margin-bottom:10px}
+#opRow input{flex:1;accent-color:var(--acc)}
+/* mini-map (street view only) */
+#mini{left:12px;padding:4px;display:none}
+#mini canvas{display:block;border-radius:8px;cursor:crosshair}
+/* nav cluster (bottom-right, vertical) */
+#navbox{position:fixed;right:12px;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+#navbox .sq{width:44px;height:40px;padding:0;display:flex;align-items:center;justify-content:center;font-size:20px}
+#compass{width:44px;height:44px;border-radius:50%;background:var(--panel);border:1px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center}
+#peg{width:44px;height:48px;border-radius:10px;background:#ffcf6b;border:1px solid #ffe2b0;cursor:grab;display:flex;align-items:center;justify-content:center;touch-action:none}
+#peg.on{outline:3px solid #fff}
+#backMap{display:none}
+#pegGhost{position:fixed;pointer-events:none;display:none;z-index:9}
+#pickbar{position:fixed;left:50%;top:12px;transform:translateX(-50%);display:none;background:#ffe2b0;color:#1a1300;border-radius:10px;padding:8px 14px;font-weight:600;z-index:7}
+#walkpad{position:fixed;left:50%;transform:translateX(-50%);display:none;gap:8px}
+#walkpad .btn{width:50px;height:40px;font-size:17px;padding:0}
+/* help popup */
+#help{left:50%;transform:translateX(-50%);width:min(560px,calc(100% - 24px));padding:12px 34px 12px 14px;display:none;z-index:8;font-size:13px;color:#d5dbe6}
+#help b{color:var(--ink)} #help .x{position:absolute;right:6px;top:4px;background:none;border:0;color:var(--mute);font-size:20px;cursor:pointer}
+#help h3{margin:0 0 6px;font-size:14px;color:var(--ink)}
+/* tour */
+#tourBar{position:fixed;top:12px;left:50%;transform:translateX(-50%);display:none;flex-direction:column;align-items:center;gap:8px;z-index:4;pointer-events:none}
+#tourBtns{display:flex;gap:8px;pointer-events:auto}
+#tourBtns .btn{font-size:17px;padding:10px 16px;border-radius:12px;display:flex;align-items:center;gap:8px}
+#tourBtns .btn .n{display:inline-flex;width:26px;height:26px;border-radius:50%;background:#ffe2b0;color:#1a1300;align-items:center;justify-content:center;font-weight:700}
+#tourBtns .btn.on{border-color:#ffe2b0;box-shadow:0 0 0 2px #ffe2b0 inset}
+#caption{max-width:min(860px,calc(100vw - 520px));font-size:21px;line-height:1.3;text-align:center;padding:10px 16px;display:none;position:static;pointer-events:auto}
+body.tour #card h1{font-size:19px} body.tour .seg button{font-size:15.5px;padding:8px 12px}
+body.tour #infoBig{font-size:42px} body.tour #infoCmp{font-size:16px} body.tour #clock{font-size:28px}
+body.tour #legend{font-size:13px} body.tour #legT{font-size:14px}
+body.tour #infoCard{top:150px}
+/* about modal */
+#about{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:20}
+#about .cardx{max-width:640px;margin:16px;background:#151a24;border:1px solid var(--line);border-radius:14px;padding:18px 20px;max-height:85vh;overflow:auto}
+#about h3{margin:0 0 8px} #about p,#about li{color:#d5dbe6;font-size:13.5px}
+#loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:#0b0e14;z-index:30;font-size:15px}
+#loading .bar{width:260px;height:6px;background:#223;border-radius:3px;overflow:hidden}
+#loading .bar i{display:block;height:100%;width:0;background:var(--acc)}
+#err{color:#ff9b8f;max-width:520px;text-align:center}
+@media (max-width:900px){#legSrc,#legCls{display:none}#caption{max-width:calc(100vw - 40px)}}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="loading"><div>Loading the Poblenou model&hellip;</div><div class="bar"><i id="lbar"></i></div><div id="err"></div></div>
+
+<!-- top-left card -->
+<div id="card" class="panel">
+  <h1><span>Poblenou heat walk <small style="font-size:11px;font-weight:500;padding:2px 6px;border-radius:6px;background:#4a3a12;color:#ffd98a;vertical-align:2px">Prototype</small></span><span class="seg" id="modeSeg"><button data-mode="tour">Tour</button><button data-mode="explore" class="on">Explore</button></span></h1>
+  <div class="row"><span class="seg" id="scen"></span></div>
+  <div class="row" id="gotoRow"><select id="goto" title="Go to a place"><option value="">Go to&hellip;</option></select></div>
+</div>
+<div id="tr"><button class="btn" id="bHelp">Help</button><button class="btn" id="bAbout">About</button></div>
+
+<!-- tour -->
+<div id="tourBar"><div id="tourBtns"></div><div id="caption" class="panel"></div></div>
+
+<!-- info card -->
+<div id="infoCard" class="panel">
+  <button class="x" id="infoX" title="close">&times;</button>
+  <div class="where" id="infoWhere"></div>
+  <div><span id="infoBig">--</span><span class="cls" id="infoCls"></span></div>
+  <div id="infoSub"></div>
+  <div id="infoCmp"></div>
+  <details id="infoMore"><summary>Details and day curve</summary>
+    <table id="infoTab"></table>
+    <canvas id="chart" width="272" height="140"></canvas>
+    <div id="chartnote"></div>
+  </details>
+</div>
+<svg id="pin" viewBox="0 0 16 16"><path d="M8 16 L2 6 A6 6 0 1 1 14 6 Z" fill="#ffcf6b" stroke="#000"/><circle cx="8" cy="6" r="2.2" fill="#000"/></svg>
+
+<!-- layers -->
+<button class="btn" id="layersBtn" title="Layers"><svg width="26" height="22" viewBox="0 0 26 22"><path d="M13 2 L24 8 L13 14 L2 8 Z" fill="#ffe2b0"/><path d="M4 11.5 L13 16.5 L22 11.5 L24 12.6 L13 19 L2 12.6 Z" fill="#aab3c2"/></svg>Layers</button>
+<div id="layersPop" class="panel">
+  <h3>At 1.1 m (where people walk)</h3>
+  <div class="chips" id="chipsPed"></div>
+  <div id="opRow">Opacity <input type="range" id="pedAlpha" min="0.1" max="1" step="0.05" value="0.85"></div>
+  <h3>Surfaces (ground, walls, roofs)</h3>
+  <div class="chips" id="chipsSurf"></div>
+</div>
+<div id="mini" class="panel"><canvas id="minicv" width="200" height="186"></canvas></div>
+
+<!-- nav cluster -->
+<div id="navbox">
+  <button class="btn" id="backMap" title="back to the map (Esc)">&#8592; Back to map</button>
+  <div id="compass" title="North (click to face north)"><svg id="compSvg" width="34" height="34" viewBox="-20 -20 40 40"><polygon points="0,-16 6,0 -6,0" fill="#ff5a4e"/><polygon points="0,16 6,0 -6,0" fill="#d6dbe4"/></svg></div>
+  <div id="peg" title="Street View: click me, then click a street; or drag me onto the map"><svg width="24" height="32" viewBox="0 0 26 34"><circle cx="13" cy="6" r="5" fill="#2a1a00"/><path d="M5 14c0-2 2-3 4-3h8c2 0 4 1 4 3v8h-3v11h-4V24h-2v9H8V22H5z" fill="#2a1a00"/></svg></div>
+  <button class="btn sq" id="zIn" title="zoom in">+</button>
+  <button class="btn sq" id="zOut" title="zoom out">&minus;</button>
+</div>
+<div id="pegGhost"><svg width="30" height="40" viewBox="0 0 26 34"><circle cx="13" cy="6" r="5" fill="#ffb347" stroke="#000"/><path d="M5 14c0-2 2-3 4-3h8c2 0 4 1 4 3v8h-3v11h-4V24h-2v9H8V22H5z" fill="#ffb347" stroke="#000"/></svg></div>
+<div id="pickbar">Click a street to stand there &middot; Esc to cancel</div>
+<div id="walkpad"><button class="btn" id="padF" title="step forward">&#9650;</button><button class="btn" id="padB" title="step back">&#9660;</button></div>
+<div id="help" class="panel"><button class="x" id="helpX" title="close">&times;</button><h3 id="helpT">How to move around</h3><div id="helpTxt"></div></div>
+
+<!-- bottom: one legend + time bar -->
+<div id="bottom" class="panel">
+  <div id="legend"><span id="legT"></span><div id="legBarWrap"><canvas id="legcv" width="520" height="10"></canvas><div id="legTicks"></div></div><span id="legCls"></span><span id="legSrc"></span></div>
+  <div id="timebar">
+    <button class="btn" id="play" title="play the day (Space)">&#9654;</button>
+    <div id="clock">--:--<small>local time</small></div>
+    <input type="range" id="time" min="0" max="1" step="0.02" value="0">
+    <div id="sunline"></div>
+  </div>
+</div>
+
+<div id="about"><div class="cardx">
+  <h3>What you are looking at</h3>
+  <p>A computer simulation of one clear, hot summer day (30 July) in the Poblenou superblock in Barcelona.</p>
+  <ul>
+    <li><b>At 1.1 m</b>: a see-through sheet at the height of a person's body, showing how hot the street <b>feels</b> as a felt temperature (PET, &deg;C). PET combines air temperature, sun and shade, heat radiated by surfaces, humidity and wind. Comfortable 18&ndash;23 &deg;C, slightly warm 23&ndash;29, warm 29&ndash;35, hot 35&ndash;41, very hot above 41.</li>
+    <li><b>Surfaces</b>: the temperature of the pavement, walls and roofs, or the sunlight they receive, from the simulation.</li>
+    <li><b>Scenarios</b> at the top left compare the street with and without trees. <b>Tour</b> walks through the main results in three steps.</li>
+    <li>Click any point on the map to see its numbers. Open <b>Help</b> for the controls.</li>
+  </ul>
+  <p style="font-size:12.5px">Prototype for discussion. It shows an earlier simulation of 30 July 2026 in the Poblenou superblock (Yamada et al. 2026, Street Art &amp; Urban Creativity 12(5), <a href="https://doi.org/10.66838/sauc.6427" target="_blank" rel="noopener" style="color:#9cc7ff">doi:10.66838/sauc.6427</a>). Known limits: tree shade enters only the 1.1 m felt temperature, not the surface temperatures; roofs receive no sunlight in these exports; the simulation runs about 3&ndash;4 &deg;C warm at noon compared with street measurements. New simulations will replace these results.</p>
+  <p style="color:var(--mute);font-size:12px">Data sources: aerial photo &copy; Institut Cartogr&agrave;fic i Geol&ograve;gic de Catalunya (ICGC), ortofoto 25 cm 2025; street trees: Ajuntament de Barcelona, Open Data BCN (Arbrat viari, Arbrat zona); building footprints: Direcci&oacute;n General del Catastro; weather forcing: Servei Meteorol&ograve;gic de Catalunya (Meteocat). Simulation and viewer: NYU, UPC and Hochschule Mainz.</p>
+  <p style="color:var(--mute);font-size:12.5px" id="tech"></p>
+  <button class="btn" id="aboutClose">Close</button>
+</div></div>
+
+<script src="data/manifest.js"></script>
+<script>
+"use strict";
+// ============================================================================ CONFIG (retune when the new runs arrive)
+// Short names for the scenario buttons and the comparison line, by scenario key.
+const SCEN_SHORT={nonveg:"No trees",bare:"No trees",veg:"Today's trees",itree:"Today's trees",paint:"+ Reflective roads",reflective:"+ Reflective roads"};
+const SCEN_CMP={nonveg:"Without trees",bare:"Without trees",veg:"With trees",itree:"With trees",paint:"With reflective roads",reflective:"With reflective roads"};
+const ROLE={base:["nonveg","bare"],trees:["veg","itree"],paint:["paint","reflective"]};   // scenario roles used by the tour
+// Tour steps. place: "hottest" | "cooling" | "paintBest" | {x,y}; time: "peak" | local hour;
+// scenario/ref: a role from ROLE; layer: 1.1 m layer key; view: "street" | "oblique".
+// Step 1 and 2 use the same spot ("cooling", the street where trees cool most at the peak) so that
+// step 2 shows the trees' effect where it matters; set place:"hottest" to start at the hottest street.
+const TOUR=[
+  {title:"Today's heat",place:"cooling",time:"peak",scenario:"base",layer:"pet",surf:"none",view:"street",pitch:-8,
+   caption:v=>`${v.clock} on a clear July day: without trees this street feels like ${v.pet} °C (${v.cls.toLowerCase()}). ${v.frac35}% of the superblock's streets are above 35 °C.`},
+  {title:"What street trees do",place:"cooling",time:"peak",scenario:"trees",ref:"base",layer:"dpet",surf:"none",view:"street",pitch:-8,
+   caption:v=>`With today's trees the same street feels like ${v.pet} °C, ${v.dAbs} °C ${v.dWord} than without them. Blue on the ground shows where trees cool.`},
+  {title:"Reflective roads",place:"paintBest",time:13,scenario:"paint",ref:"trees",layer:"dpet",surf:"none",view:"oblique",requires:"paint",
+   disabledTip:"Coming with the new simulations",
+   caption:v=>`${v.clock}: reflective road paint changes the felt temperature here by ${v.dSigned} °C compared with today's trees.`}
+];
+
+// ============================================================================ math
+const M4={
+  persp(f,a,n,fa){const t=1/Math.tan(f/2),r=new Float32Array(16);r[0]=t/a;r[5]=t;r[10]=(fa+n)/(n-fa);r[11]=-1;r[14]=2*fa*n/(n-fa);return r},
+  look(e,c,u){let z=norm(sub(e,c)),x=norm(cross(u,z)),y=cross(z,x);return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dot(x,e),-dot(y,e),-dot(z,e),1])},
+  mul(a,b){const r=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+j]*b[i*4+k];r[i*4+j]=s}return r},
+  inv(m){const r=new Float32Array(16),[a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15]=m;
+    const b0=a0*a5-a1*a4,b1=a0*a6-a2*a4,b2=a0*a7-a3*a4,b3=a1*a6-a2*a5,b4=a1*a7-a3*a5,b5=a2*a7-a3*a6,b6=a8*a13-a9*a12,b7=a8*a14-a10*a12,b8=a8*a15-a11*a12,b9=a9*a14-a10*a13,b10=a9*a15-a11*a13,b11=a10*a15-a11*a14;
+    let d=b0*b11-b1*b10+b2*b9+b3*b8-b4*b7+b5*b6;if(!d)return r;d=1/d;
+    r[0]=(a5*b11-a6*b10+a7*b9)*d;r[1]=(a2*b10-a1*b11-a3*b9)*d;r[2]=(a13*b5-a14*b4+a15*b3)*d;r[3]=(a10*b4-a9*b5-a11*b3)*d;
+    r[4]=(a6*b8-a4*b11-a7*b7)*d;r[5]=(a0*b11-a2*b8+a3*b7)*d;r[6]=(a14*b2-a12*b5-a15*b1)*d;r[7]=(a8*b5-a10*b2+a11*b1)*d;
+    r[8]=(a4*b10-a5*b8+a7*b6)*d;r[9]=(a1*b8-a0*b10-a3*b6)*d;r[10]=(a12*b4-a13*b2+a15*b0)*d;r[11]=(a9*b2-a8*b4-a11*b0)*d;
+    r[12]=(a5*b7-a4*b9-a6*b6)*d;r[13]=(a0*b9-a1*b7+a2*b6)*d;r[14]=(a13*b1-a12*b3-a14*b0)*d;r[15]=(a8*b3-a9*b1+a10*b0)*d;return r}
+};
+function sub(a,b){return[a[0]-b[0],a[1]-b[1],a[2]-b[2]]}function dot(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]}
+function cross(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]}
+function norm(a){const l=Math.hypot(a[0],a[1],a[2])||1;return[a[0]/l,a[1]/l,a[2]/l]}
+function mulv(m,v){const r=[0,0,0,0];for(let i=0;i<4;i++)r[i]=m[i]*v[0]+m[4+i]*v[1]+m[8+i]*v[2]+m[12+i]*v[3];return r}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), lerp=(a,b,t)=>a+(b-a)*t;
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
+const wrap360=a=>((a%360)+360)%360, angLerp=(a,b,t)=>wrap360(a+(((b-a+540)%360)-180)*t);
+
+// ============================================================================ data helpers
+function b64bytes(s){const bin=atob(s),n=bin.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=bin.charCodeAt(i);return u}
+async function gunzip(s){const ds=new DecompressionStream("gzip");return new Uint8Array(await new Response(new Blob([b64bytes(s)]).stream().pipeThrough(ds)).arrayBuffer())}
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement("script");s.src=src;s.onload=res;s.onerror=()=>rej(new Error("could not load "+src));document.head.appendChild(s)})}
+const scratch=document.createElement("canvas"),sctx=scratch.getContext("2d",{willReadFrequently:true});
+async function decodeImage(uri){const img=new Image();img.src=uri;await img.decode();scratch.width=img.width;scratch.height=img.height;sctx.drawImage(img,0,0);return sctx.getImageData(0,0,img.width,img.height)}
+function fmtClock(h){h=((h%24)+24)%24;const m=Math.round(h*60)%1440;return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0")}
+const $=id=>document.getElementById(id);
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+// ============================================================================ layers & palettes
+const PET_CLASSES=[[18,"Cool"],[23,"Comfortable"],[29,"Slightly warm"],[35,"Warm"],[41,"Hot"],[99,"Very hot"]];
+function petClass(v){for(const [e,n] of PET_CLASSES)if(v<e)return n;return "Very hot"}
+const HEAT=[[0,"#3b6fb6"],[.16,"#7fc6a4"],[.34,"#f6e27a"],[.53,"#f39c45"],[.72,"#d7301f"],[.9,"#7a0177"],[1,"#3f0040"]];
+const PED={
+  pet:{chip:"PET",name:"Felt temperature (PET) at 1.1 m",unit:"°C",src:0,ch:0,q:"pet",lo:18,hi:50,stops:HEAT,classes:true},
+  tair:{chip:"Air temperature",name:"Air temperature at 1.1 m",unit:"°C",src:0,ch:2,q:"tair",lo:22,hi:40,stops:HEAT},
+  tmrt:{chip:"Radiant heat (Tmrt)",name:"Radiant heat (Tmrt) at 1.1 m",unit:"°C",src:0,ch:1,q:"tmrt",lo:20,hi:70,stops:HEAT},
+  wind:{chip:"Wind",name:"Wind speed at 1.1 m",unit:"m/s",src:1,ch:0,q:"wind",lo:0,hi:4,stops:[[0,"#fbfdff"],[.5,"#6baed6"],[1,"#08306b"]]},
+  sun:{chip:"Sun and shade",name:"Sun and shade at 1.1 m",unit:"",src:1,ch:1,q:"sun",lo:0,hi:1,stops:[[0,"#34405a"],[.15,"#5a6b8a"],[1,"#ffe9a8"]]},
+  dpet:{chip:"PET change",name:"Felt-temperature change",unit:"°C",src:0,ch:0,q:"pet",lo:-10,hi:10,diff:true,stops:[[0,"#2166ac"],[.35,"#92c5de"],[.5,"#f4f4f4"],[.65,"#f4a582"],[1,"#b2182b"]]}
+};
+const SURF={
+  none:{chip:"Photo",name:"",off:true,ch:0,q:"tsurf",lo:0,hi:1,stops:[[0,"#000000"],[1,"#ffffff"]]},
+  tsurf:{chip:"Surface temperature",name:"Surface temperature (ground, walls, roofs)",unit:"°C",ch:0,q:"tsurf",lo:20,hi:60,stops:HEAT,wall:"wallT"},
+  solar:{chip:"Sunlight",name:"Sunlight on surfaces",unit:"W/m²",ch:1,q:"solar",lo:0,hi:900,stops:[[0,"#1b2033"],[.3,"#6a3d8f"],[.65,"#f08a3a"],[1,"#fff1b8"]],wall:"wallS"}
+};
+function hex(c){const n=parseInt(c.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255]}
+function buildLUT(stops){const out=new Uint8Array(256*4);for(let i=0;i<256;i++){const t=i/255;let k=0;while(k<stops.length-2&&t>stops[k+1][0])k++;
+  const [t0,c0]=stops[k],[t1,c1]=stops[k+1],f=clamp((t-t0)/(t1-t0||1),0,1),a=hex(c0),b=hex(c1);
+  for(let j=0;j<3;j++)out[i*4+j]=Math.round(lerp(a[j],b[j],f));out[i*4+3]=255}return out}
+
+// ============================================================================ GL
+const cv=$("gl");const gl=cv.getContext("webgl2",{antialias:true});
+function sh(t,src){const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s}
+function prog(vs,fs){const p=gl.createProgram();gl.attachShader(p,sh(gl.VERTEX_SHADER,vs));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);
+  if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(p));
+  const u={},n=gl.getProgramParameter(p,gl.ACTIVE_UNIFORMS);for(let i=0;i<n;i++){const a=gl.getActiveUniform(p,i);u[a.name]=gl.getUniformLocation(p,a.name)}
+  return {p,u,a:name=>gl.getAttribLocation(p,name)}}
+function tex(w,h,data,{mip=false,nearest=false}={}){const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,data);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,nearest?gl.NEAREST:gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,nearest?gl.NEAREST:(mip?gl.LINEAR_MIPMAP_LINEAR:gl.LINEAR));
+  if(mip)gl.generateMipmap(gl.TEXTURE_2D);return t}
+const COMMON=`
+uniform vec3 u_cam; uniform vec3 u_fog; uniform float u_fogd; uniform vec3 u_sun; uniform float u_day;
+uniform vec4 u_grid;
+vec3 fogit(vec3 c, vec3 w){ float d=length(w-u_cam); return mix(c,u_fog,1.0-exp(-d*u_fogd)); }
+vec2 gridUV(vec2 p){ return vec2((p.x-u_grid.x)/(u_grid.z-u_grid.x),(u_grid.w-p.y)/(u_grid.w-u_grid.y)); }
+bool inside(vec2 uv){ return uv.x>=0.0&&uv.x<=1.0&&uv.y>=0.0&&uv.y<=1.0; }
+float pickc(vec4 c,float ch){ return ch<0.5?c.r:(ch<1.5?c.g:c.b); }
+// bilinear filter that only mixes ground cells (want=1) or only building/roof cells (want=0)
+vec4 mbil(sampler2D t, sampler2D st, vec2 uv, float want){
+ vec2 sz=vec2(textureSize(t,0)); vec2 p=uv*sz-0.5; vec2 f=fract(p); ivec2 i=ivec2(floor(p)); ivec2 mx=ivec2(sz)-1;
+ vec4 acc=vec4(0.0); float ws=0.0;
+ for(int dy=0;dy<2;dy++)for(int dx=0;dx<2;dx++){ ivec2 q=clamp(i+ivec2(dx,dy),ivec2(0),mx);
+   float o=step(0.5,texelFetch(st,q,0).g); float ok=want>0.5?o:1.0-o;
+   float w=(dx==0?1.0-f.x:f.x)*(dy==0?1.0-f.y:f.y)*ok; acc+=texelFetch(t,q,0)*w; ws+=w; }
+ if(ws>1e-4) return acc/ws;
+ ivec2 c0=clamp(ivec2(floor(uv*sz)),ivec2(0),mx); vec4 best=texelFetch(t,c0,0); float bd=1e9;
+ for(int dy=-2;dy<=2;dy++)for(int dx=-2;dx<=2;dx++){ ivec2 q=clamp(c0+ivec2(dx,dy),ivec2(0),mx);
+   float o=step(0.5,texelFetch(st,q,0).g); float ok=want>0.5?o:1.0-o; float d=float(dx*dx+dy*dy);
+   if(ok>0.5&&d<bd){bd=d;best=texelFetch(t,q,0);} }
+ return best; }`;
+
+const SKY=prog(`#version 300 es
+in vec2 a; out vec2 v; void main(){v=a;gl_Position=vec4(a,0.999,1.0);}`,
+`#version 300 es
+precision highp float; in vec2 v; out vec4 o; uniform mat4 u_ivp; uniform vec3 u_cam; uniform vec3 u_sun; uniform vec3 u_zen; uniform vec3 u_hor; uniform float u_day;
+void main(){ vec4 p=u_ivp*vec4(v,1.0,1.0); vec3 d=normalize(p.xyz/p.w-u_cam);
+ float e=clamp(d.z,-0.2,1.0); vec3 c=mix(u_hor,u_zen,smoothstep(0.0,0.45,e));
+ float s=max(dot(d,u_sun),0.0); c+=u_day*(pow(s,600.0)*vec3(1.0,0.95,0.8)*2.0+pow(s,8.0)*vec3(0.25,0.18,0.08)); o=vec4(c,1.0);}`);
+
+const GROUND=prog(`#version 300 es
+in vec2 a; uniform mat4 u_vp; out vec3 w; void main(){w=vec3(a,0.0);gl_Position=u_vp*vec4(a,0.0,1.0);}`,
+`#version 300 es
+precision highp float; in vec3 w; out vec4 o;
+uniform sampler2D u_B0,u_B1,u_C0,u_C1,u_ph,u_lutS,u_st;
+uniform float u_mix,u_smix,u_photo,u_sOn,u_sch; uniform vec4 u_orect; uniform vec2 u_sq,u_sdisp;
+${COMMON}
+void main(){
+ vec2 uv=gridUV(w.xy); bool inG=inside(uv);
+ vec2 g=fract(w.xy/1.2); vec3 base=vec3(0.60,0.59,0.56)*(0.96+0.04*step(0.06,min(g.x,g.y)));
+ if(u_photo>0.5){ vec2 ou=vec2((w.x-u_orect.x)/(u_orect.z-u_orect.x),(u_orect.w-w.y)/(u_orect.w-u_orect.y)); if(inside(ou)) base=texture(u_ph,ou).rgb; }
+ vec3 col;
+ if(inG){
+   float sun=mix(texture(u_B0,uv),texture(u_B1,uv),u_mix).g;
+   col=base*(0.30+0.70*u_day)*mix(1.0,mix(0.55,1.0,sun),u_day);
+   if(u_sOn>0.5){ float v=u_sq.x+pickc(mix(mbil(u_C0,u_st,uv,1.0),mbil(u_C1,u_st,uv,1.0),u_smix),u_sch)*(u_sq.y-u_sq.x);
+     vec3 dc=texture(u_lutS,vec2(clamp((v-u_sdisp.x)/(u_sdisp.y-u_sdisp.x),0.0,1.0),0.5)).rgb;
+     col=mix(col,dc*(0.85+0.15*u_day),0.92); }
+ } else col=base*(0.30+0.70*u_day)*0.92;
+ o=vec4(fogit(col,w),1.0);
+}`);
+
+const PEDP=prog(`#version 300 es
+in vec2 a; uniform mat4 u_vp; out vec3 w; void main(){w=vec3(a,1.1);gl_Position=u_vp*vec4(w,1.0);}`,
+`#version 300 es
+precision highp float; in vec3 w; out vec4 o;
+uniform sampler2D u_A0,u_A1,u_B0,u_B1,u_R0,u_R1,u_st,u_lutP;
+uniform float u_mix,u_alpha,u_src,u_ch,u_diff; uniform vec2 u_q,u_disp;
+${COMMON}
+void main(){
+ vec2 uv=gridUV(w.xy); if(!inside(uv)) discard;
+ if(texture(u_st,uv).g<0.5) discard;
+ float v;
+ if(u_diff>0.5){ float a=mix(texture(u_A0,uv),texture(u_A1,uv),u_mix).r, r=mix(texture(u_R0,uv),texture(u_R1,uv),u_mix).r; v=(a-r)*(u_q.y-u_q.x); }
+ else { vec4 c=u_src<0.5?mix(texture(u_A0,uv),texture(u_A1,uv),u_mix):mix(texture(u_B0,uv),texture(u_B1,uv),u_mix); v=u_q.x+pickc(c,u_ch)*(u_q.y-u_q.x); }
+ vec3 dc=texture(u_lutP,vec2(clamp((v-u_disp.x)/(u_disp.y-u_disp.x),0.0,1.0),0.5)).rgb*(0.80+0.20*u_day);
+ o=vec4(fogit(dc,w),u_alpha);
+}`);
+
+const BLDG=prog(`#version 300 es
+in vec3 a_p; in vec3 a_n; in float a_t0; in float a_t1; uniform mat4 u_vp; uniform float u_smix;
+out vec3 w; out vec3 n; out float t;
+void main(){w=a_p;n=a_n;t=mix(a_t0,a_t1,u_smix);gl_Position=u_vp*vec4(a_p,1.0);}`,
+`#version 300 es
+precision highp float; in vec3 w; in vec3 n; in float t; out vec4 o;
+uniform sampler2D u_C0,u_C1,u_lutS,u_st; uniform float u_smix,u_sOn,u_sch; uniform vec2 u_sq,u_sdisp;
+${COMMON}
+void main(){
+ vec3 N=normalize(n); bool roof=N.z>0.5;
+ float dif=max(dot(N,u_sun),0.0)*u_day; float amb=(0.28+0.30*u_day)*(0.85+0.15*N.z);
+ vec3 alb=roof?vec3(0.66,0.64,0.61):vec3(0.86,0.82,0.75);
+ if(!roof){ float s=dot(w.xy,vec2(-N.y,N.x)); float fz=fract(w.z/3.2), fs=fract(s/3.4);
+   if(w.z<3.4) alb*=0.78; else if(fz>0.32&&fz<0.80&&fs>0.28&&fs<0.72) alb=mix(vec3(0.20,0.25,0.31),vec3(0.55,0.65,0.78),0.25+0.25*N.z); }
+ vec3 col=alb*(amb+0.85*dif);
+ if(u_sOn>0.5){ float v;
+   if(roof){ vec2 ruv=gridUV(w.xy); v=u_sq.x+pickc(mix(mbil(u_C0,u_st,ruv,0.0),mbil(u_C1,u_st,ruv,0.0),u_smix),u_sch)*(u_sq.y-u_sq.x); }
+   else v=u_sq.x+t*(u_sq.y-u_sq.x);
+   vec3 dc=texture(u_lutS,vec2(clamp((v-u_sdisp.x)/(u_sdisp.y-u_sdisp.x),0.0,1.0),0.5)).rgb;
+   col=dc*(0.75+0.25*(amb+dif)); }
+ o=vec4(fogit(col,w),1.0);
+}`);
+
+const TREE=prog(`#version 300 es
+in vec3 a_p; in vec3 a_n; in vec4 a_i; in float a_cb; uniform mat4 u_vp; uniform float u_part;
+out vec3 w; out vec3 n; out float hv;
+float hash(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
+void main(){ float h=a_i.z,r=a_i.w,cb=a_cb; vec3 p; hv=hash(a_i.xy);
+ if(u_part<0.5){ float a=max(0.5*(h-cb),0.5); vec3 s=vec3(r,r,a); float j=1.0+0.08*sin(dot(a_p,vec3(7.0,5.0,3.0))+hv*20.0);
+   p=vec3(a_i.xy,0.5*(h+cb))+a_p*s*j; n=normalize(a_n/s); }
+ else { float tr=0.10+0.012*h; p=vec3(a_i.xy,0.0)+vec3(a_p.xy*tr,a_p.z*(cb+0.35*(h-cb))); n=a_n; }
+ w=p; gl_Position=u_vp*vec4(p,1.0);}`,
+`#version 300 es
+precision highp float; in vec3 w; in vec3 n; in float hv; out vec4 o; uniform float u_part;
+${COMMON}
+void main(){ vec3 N=normalize(n); float dif=max(dot(N,u_sun),0.0)*u_day; float amb=(0.25+0.30*u_day)*(0.8+0.2*N.z);
+ vec3 alb=u_part<0.5?mix(vec3(0.20,0.38,0.16),vec3(0.33,0.50,0.20),hv):vec3(0.36,0.27,0.19);
+ o=vec4(fogit(alb*(amb+0.9*dif),w),1.0);}`);
+
+// ============================================================================ state
+const S={man:null,scen:0,ref:0,ped:{on:true,layer:"pet",alpha:.85},surf:"none",photo:true,tf:0,mode:"map",ui:"explore",
+  pos:[0,0],head:45,pitch:0,fov:72,map:{tx:830,ty:760,dist:1500,head:15,pitch:55},
+  keys:{},play:false,staticData:null,dirty:true,pick:false,probe:null,cardOpen:false,tourStep:-1};
+let lutP,lutS,stTex,phTex,blankTex;
+const cache=new Map(),CACHE_MAX=40;
+async function frame(sk,kind,i){const k=sk+"|"+kind+"|"+i;if(cache.has(k)){const e=cache.get(k);cache.delete(k);cache.set(k,e);return e}
+  const F=EXPO.frames[sk],arr=kind==="A"?F.imgA:(kind==="B"?F.imgB:F.imgC);
+  const id=await decodeImage(arr[i]);const e={data:id.data,tex:tex(id.width,id.height,id.data,{mip:true})};cache.set(k,e);
+  while(cache.size>CACHE_MAX){const [ok,ov]=cache.entries().next().value;gl.deleteTexture(ov.tex);cache.delete(ok)}return e}
+const keyOf=i=>S.man.scenarios[i].key;
+function roleIndex(role){const ks=ROLE[role]||[role];return S.man.scenarios.findIndex(s=>ks.includes(s.key))}
+const shortName=s=>SCEN_SHORT[s.key]||s.label, cmpName=s=>SCEN_CMP[s.key]||s.label;
+
+// ============================================================================ geometry
+let vaoB,nIdxB,vaoT,vaoTr,nT,crownN,trunkN,bufT0,bufT1,nVerts,nWall,vaoG,vaoP,vaoS;const wallData={};
+function icosphere(){const t=(1+Math.sqrt(5))/2;let v=[[-1,t,0],[1,t,0],[-1,-t,0],[1,-t,0],[0,-1,t],[0,1,t],[0,-1,-t],[0,1,-t],[t,0,-1],[t,0,1],[-t,0,-1],[-t,0,1]].map(norm);
+  const f=[[0,11,5],[0,5,1],[0,1,7],[0,7,10],[0,10,11],[1,5,9],[5,11,4],[11,10,2],[10,7,6],[7,1,8],[3,9,4],[3,4,2],[3,2,6],[3,6,8],[3,8,9],[4,9,5],[2,4,11],[6,2,10],[8,6,7],[9,8,1]];
+  const mid={},m=(a,b)=>{const k=a<b?a+"_"+b:b+"_"+a;if(mid[k]===undefined){mid[k]=v.length;v.push(norm([(v[a][0]+v[b][0])/2,(v[a][1]+v[b][1])/2,(v[a][2]+v[b][2])/2]))}return mid[k]};
+  const f2=[];for(const [a,b,c] of f){const ab=m(a,b),bc=m(b,c),ca=m(c,a);f2.push([a,ab,ca],[b,bc,ab],[c,ca,bc],[ab,bc,ca])}
+  const P=[],I=[];for(const p of v)P.push(...p,...p);for(const t3 of f2)I.push(...t3);return {P:new Float32Array(P),I:new Uint16Array(I)}}
+function prism(){const P=[],I=[],n=6;for(let k=0;k<=n;k++){const a=k/n*2*Math.PI,c=Math.cos(a),s=Math.sin(a);P.push(c,s,0,c,s,0,c,s,1,c,s,0)}
+  for(let k=0;k<n;k++){const a=2*k,b=2*k+1,c=2*k+2,d=2*k+3;I.push(a,c,b,b,c,d)}return {P:new Float32Array(P),I:new Uint16Array(I)}}
+function meshVAO(prg,mesh,inst){const vao=gl.createVertexArray();gl.bindVertexArray(vao);
+  const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,mesh.P,gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(prg.a("a_p"));gl.vertexAttribPointer(prg.a("a_p"),3,gl.FLOAT,false,24,0);
+  gl.enableVertexAttribArray(prg.a("a_n"));gl.vertexAttribPointer(prg.a("a_n"),3,gl.FLOAT,false,24,12);
+  const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,mesh.I,gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER,inst);
+  gl.enableVertexAttribArray(prg.a("a_i"));gl.vertexAttribPointer(prg.a("a_i"),4,gl.FLOAT,false,20,0);gl.vertexAttribDivisor(prg.a("a_i"),1);
+  gl.enableVertexAttribArray(prg.a("a_cb"));gl.vertexAttribPointer(prg.a("a_cb"),1,gl.FLOAT,false,20,16);gl.vertexAttribDivisor(prg.a("a_cb"),1);
+  gl.bindVertexArray(null);return vao}
+function quadVAO(prg,arr){const v=gl.createVertexArray();gl.bindVertexArray(v);const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,arr,gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(prg.a("a"));gl.vertexAttribPointer(prg.a("a"),2,gl.FLOAT,false,0,0);gl.bindVertexArray(null);return v}
+async function uploadGeometry(){
+  const G=EXPO.geometry;nVerts=G.nVerts;nWall=G.nWall;
+  const pos=new Float32Array((await gunzip(G.pos)).buffer),nrm=new Int8Array((await gunzip(G.nrm)).buffer),idx=new Uint32Array((await gunzip(G.idx)).buffer);
+  vaoB=gl.createVertexArray();gl.bindVertexArray(vaoB);
+  let b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,pos,gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(BLDG.a("a_p"));gl.vertexAttribPointer(BLDG.a("a_p"),3,gl.FLOAT,false,0,0);
+  b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,nrm,gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(BLDG.a("a_n"));gl.vertexAttribPointer(BLDG.a("a_n"),3,gl.BYTE,true,0,0);
+  bufT0=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bufT0);gl.bufferData(gl.ARRAY_BUFFER,nVerts,gl.DYNAMIC_DRAW);
+  gl.enableVertexAttribArray(BLDG.a("a_t0"));gl.vertexAttribPointer(BLDG.a("a_t0"),1,gl.UNSIGNED_BYTE,true,0,0);
+  bufT1=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bufT1);gl.bufferData(gl.ARRAY_BUFFER,nVerts,gl.DYNAMIC_DRAW);
+  gl.enableVertexAttribArray(BLDG.a("a_t1"));gl.vertexAttribPointer(BLDG.a("a_t1"),1,gl.UNSIGNED_BYTE,true,0,0);
+  b=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,b);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,idx,gl.STATIC_DRAW);nIdxB=idx.length;gl.bindVertexArray(null);
+  const tr=new Float32Array((await gunzip(G.trees)).buffer);nT=G.nTrees;
+  const ib=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,ib);gl.bufferData(gl.ARRAY_BUFFER,tr,gl.STATIC_DRAW);
+  const sp=icosphere(),pr=prism();crownN=sp.I.length;trunkN=pr.I.length;vaoT=meshVAO(TREE,sp,ib);vaoTr=meshVAO(TREE,pr,ib);
+  const st=await decodeImage(G.staticPng);S.staticData=st.data;stTex=tex(st.width,st.height,st.data,{nearest:true});
+  const m=S.man.grid,E=2500;
+  vaoG=quadVAO(GROUND,new Float32Array([m.x0-E,m.y0-E,m.x1+E,m.y0-E,m.x0-E,m.y1+E,m.x1+E,m.y1+E]));
+  vaoP=quadVAO(PEDP,new Float32Array([m.x0,m.y0,m.x1,m.y0,m.x0,m.y1,m.x1,m.y1]));
+  vaoS=quadVAO(SKY,new Float32Array([-1,-1,3,-1,-1,3]));
+  for(const sc of S.man.scenarios){const F=EXPO.frames[sc.key];wallData[sc.key]={wallT:await gunzip(F.wallT),wallS:await gunzip(F.wallS)}}
+  blankTex=tex(1,1,new Uint8Array([0,0,0,255]));
+  if(window.EXPO.ortho){const img=new Image();img.src=EXPO.ortho.uri;await img.decode();phTex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,phTex);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    const ext=gl.getExtension("EXT_texture_filter_anisotropic");if(ext)gl.texParameterf(gl.TEXTURE_2D,ext.TEXTURE_MAX_ANISOTROPY_EXT,8)}
+  else{phTex=blankTex;S.photo=false}
+}
+
+// ============================================================================ grid sampling
+function cellIndex(x,y){const g=S.man.grid,c=Math.floor((x-g.x0)/g.cell),r=Math.floor((g.y1-y)/g.cell);if(c<0||r<0||c>=g.nx||r>=g.ny)return -1;return r*g.nx+c}
+function isOutdoor(x,y){const k=cellIndex(x,y);return k<0?true:S.staticData[k*4+1]>127}
+const val=(d,k,ch)=>d[k*4+ch]/255;
+
+// ============================================================================ time / frames
+const cur={ready:false,token:0};
+function bracketT(ts,h){if(h<=ts[0])return[0,0,0];if(h>=ts[ts.length-1])return[ts.length-1,ts.length-1,0];let j=1;while(ts[j]<h-1e-6)j++;if(Math.abs(ts[j]-h)<1e-6)return[j,j,0];return[j-1,j,(h-ts[j-1])/(ts[j]-ts[j-1])]}
+function timeHour(){const t=S.man.times,tf=clamp(S.tf,0,t.length-1),i=Math.floor(tf),j=Math.min(i+1,t.length-1);return lerp(t[i],t[j],tf-i)}
+function sunNow(){const s=S.man.sun,tf=clamp(S.tf,0,s.length-1),i=Math.floor(tf),j=Math.min(i+1,s.length-1),w=tf-i;
+  return {dir:norm([lerp(s[i].dir[0],s[j].dir[0],w),lerp(s[i].dir[1],s[j].dir[1],w),lerp(s[i].dir[2],s[j].dir[2],w)]),elev:lerp(s[i].elev,s[j].elev,w)}}
+async function updateFrames(){
+  const nT=S.man.times.length,tf=clamp(S.tf,0,nT-1),i0=Math.floor(tf),i1=Math.min(i0+1,nT-1),w=tf-i0;
+  const st=S.man.surfTimes||S.man.times,[j0,j1,sw]=bracketT(st,timeHour());
+  const sk=keyOf(S.scen),rk=keyOf(S.ref),tok=++cur.token;
+  const need=[frame(sk,"A",i0),frame(sk,"A",i1),frame(sk,"B",i0),frame(sk,"B",i1),frame(rk,"A",i0),frame(rk,"A",i1),frame(sk,"C",j0),frame(sk,"C",j1)];
+  for(const k of S.man.scenarios.map(s=>s.key).filter(k=>k!==sk&&k!==rk))need.push(frame(k,"A",i0),frame(k,"A",i1));
+  const r=await Promise.all(need);if(tok!==cur.token)return;
+  Object.assign(cur,{i0,i1,w,j0,j1,sw,A0:r[0],A1:r[1],B0:r[2],B1:r[3],R0:r[4],R1:r[5],C0:r[6],C1:r[7],ready:true});
+  uploadWalls();
+  if(i1+1<nT){frame(sk,"A",i1+1);frame(sk,"B",i1+1)}
+  drawMiniBase();updateCard();drawLegend();S.dirty=true}
+function uploadWalls(){if(!cur.ready)return;const L=SURF[S.surf];if(L.off)return;const d=wallData[keyOf(S.scen)][L.wall];
+  gl.bindBuffer(gl.ARRAY_BUFFER,bufT0);gl.bufferSubData(gl.ARRAY_BUFFER,0,d.subarray(cur.j0*nWall,(cur.j0+1)*nWall));
+  gl.bindBuffer(gl.ARRAY_BUFFER,bufT1);gl.bufferSubData(gl.ARRAY_BUFFER,0,d.subarray(cur.j1*nWall,(cur.j1+1)*nWall))}
+function srcNote(kind){if(!cur.ready)return "";const F=EXPO.frames[keyOf(S.scen)],t=fmtClock(timeHour());
+  if(kind==="ped"){const ps=[...new Set([...(F.pedSrc?F.pedSrc[cur.i0]:[]),...(F.pedSrc&&cur.w>1e-3?F.pedSrc[cur.i1]:[])])].sort();
+    return ps.length?`${t} · from CFD exports ${ps.join(", ")}`:""}
+  const ss=[...new Set([...(F.surfSrc?F.surfSrc[cur.j0]:[]),...(F.surfSrc&&cur.sw>1e-3?F.surfSrc[cur.j1]:[])])].sort();
+  return ss.length?`${t} · from CFD surface exports ${ss.join(", ")}`+(S.surf==="solar"?roofNote():""):""}
+function roofNote(){const c=S.man.curves[keyOf(S.scen)];if(!c.solar_roof)return "";const r=Math.max(...c.solar_roof),g=Math.max(...c.solar_ground);
+  return (r<5&&g>100)?" · roofs show 0 W/m² because this CFD export has no sunlight on roofs":""}
+
+// ============================================================================ camera
+function eyeDir(){const h=S.head*Math.PI/180,p=S.pitch*Math.PI/180;return [Math.sin(h)*Math.cos(p),Math.cos(h)*Math.cos(p),Math.sin(p)]}
+function mapEye(m){const h=m.head*Math.PI/180,p=m.pitch*Math.PI/180;return [m.tx-Math.sin(h)*Math.cos(p)*m.dist,m.ty-Math.cos(h)*Math.cos(p)*m.dist,Math.sin(p)*m.dist]}
+function camera(){const asp=cv.width/cv.height;let eye,ctr,fov,near;
+  if(S.mode==="walk"){eye=[S.pos[0],S.pos[1],1.6];const d=eyeDir();ctr=[eye[0]+d[0],eye[1]+d[1],eye[2]+d[2]];fov=S.fov;near=0.25}
+  else{eye=mapEye(S.map);ctr=[S.map.tx,S.map.ty,0];fov=45;near=Math.max(1,S.map.dist*0.01)}
+  const VP=M4.mul(M4.persp(fov*Math.PI/180,asp,near,12000),M4.look(eye,ctr,[0,0,1]));return {VP,IVP:M4.inv(VP),eye}}
+function groundAt(cx,cy){const c=camera(),r=cv.getBoundingClientRect();const nx=(cx-r.left)/r.width*2-1,ny=1-(cy-r.top)/r.height*2;
+  const a=mulv(c.IVP,[nx,ny,-1,1]),b=mulv(c.IVP,[nx,ny,1,1]);const p0=[a[0]/a[3],a[1]/a[3],a[2]/a[3]],p1=[b[0]/b[3],b[1]/b[3],b[2]/b[3]];
+  if(p1[2]>=p0[2]-1e-6)return null;const t=p0[2]/(p0[2]-p1[2]);if(t<0)return null;return [lerp(p0[0],p1[0],t),lerp(p0[1],p1[1],t)]}
+function project(x,y,z){const c=camera(),p=mulv(c.VP,[x,y,z,1]);if(p[3]<=0)return null;const r=cv.getBoundingClientRect();
+  return [r.left+(p[0]/p[3]*0.5+0.5)*r.width,r.top+(0.5-p[1]/p[3]*0.5)*r.height]}
+function clampMap(){const m=S.map,g=S.man.grid;m.dist=clamp(m.dist,40,4500);m.pitch=clamp(m.pitch,20,89);m.head=wrap360(m.head);
+  m.tx=clamp(m.tx,g.x0-800,g.x1+800);m.ty=clamp(m.ty,g.y0-800,g.y1+800)}
+function zoomMapAt(cx,cy,f){const m=S.map,p=(cx===null?null:groundAt(cx,cy))||[m.tx,m.ty];const nd=clamp(m.dist*f,40,4500),ff=nd/m.dist;
+  m.tx=p[0]+(m.tx-p[0])*ff;m.ty=p[1]+(m.ty-p[1])*ff;m.dist=nd;clampMap();S.dirty=true}
+function panMap(x0,y0,x1,y1){const a=groundAt(x0,y0),b=groundAt(x1,y1);if(!a||!b)return;S.map.tx+=a[0]-b[0];S.map.ty+=a[1]-b[1];clampMap();S.dirty=true}
+function bestHeading(x,y){let best=0,bd=-1;for(let k=0;k<72;k++){const a=k*5*Math.PI/180;let d=0;for(;d<300;d+=2){if(!isOutdoor(x+Math.sin(a)*d,y+Math.cos(a)*d))break}if(d>bd){bd=d;best=k*5}}return best}
+function nearestOutdoor(x,y){if(isOutdoor(x,y))return[x,y];for(let r=2;r<80;r+=2)for(let k=0;k<24;k++){const a=k/24*2*Math.PI,px=x+Math.cos(a)*r,py=y+Math.sin(a)*r;if(isOutdoor(px,py))return[px,py]}return[x,y]}
+let glide=null,tween=null,fly=null;
+function enterStreet(x,y,head){[x,y]=nearestOutdoor(x,y);S.pos=[x,y];S.head=head===undefined?(S.mode==="map"?S.map.head:S.head):head;S.pitch=0;S.fov=72;
+  S.mode="walk";S.cardOpen=true;setPick(false);setModeUI();S.dirty=true;updateCard()}
+function toMap(){if(S.mode==="map")return;const m=S.map;m.tx=S.pos[0];m.ty=S.pos[1];m.head=S.head;m.pitch=50;m.dist=420;S.mode="map";
+  S.probe=[S.pos[0],S.pos[1]];setModeUI();S.dirty=true;updateCard()}
+function goTo(x,y,head){[x,y]=nearestOutdoor(x,y);if(S.mode!=="walk"){enterStreet(x,y,head);return}glide={from:[...S.pos],to:[x,y],t:0,head:head===undefined?null:head}}
+function setPick(on){S.pick=on;$("peg").classList.toggle("on",on);$("pickbar").style.display=on?"block":"none";cv.classList.toggle("pick",on)}
+// animated flight: through the map camera, ending either in Street View or at an oblique map view
+function flyTo(target,dur=1.6){return new Promise(res=>{
+  if(S.mode==="walk"){const m=S.map;m.tx=S.pos[0];m.ty=S.pos[1];m.head=S.head;m.pitch=25;m.dist=60;S.mode="map";setModeUI()}
+  const end=target.mode==="walk"?{tx:target.x,ty:target.y,dist:45,head:target.head,pitch:22}:{tx:target.tx,ty:target.ty,dist:target.dist,head:target.head,pitch:target.pitch};
+  const far=Math.hypot(end.tx-S.map.tx,end.ty-S.map.ty);
+  fly={from:{...S.map},to:end,t:0,dur,lift:Math.min(900,far*0.8),done:()=>{if(target.mode==="walk"){enterStreet(target.x,target.y,target.head);S.pitch=target.pitch||0}res()}}})}
+
+// ============================================================================ UI
+const HELP={map:"<b>Drag</b> to move the map &middot; <b>scroll</b> or <b>pinch</b> to zoom at the cursor &middot; <b>right-drag</b> or <b>Ctrl+drag</b> to rotate and tilt &middot; <b>double-click</b> to zoom in &middot; two-finger drag on a touchpad moves the map &middot; <b>click</b> a point to see its numbers. <b>Street View</b>: click the yellow figure (bottom right), then click a street, or drag the figure onto the map.",
+  walk:"<b>Drag</b> to look around &middot; <b>scroll</b> or <b>pinch</b> to zoom &middot; <b>double-click</b> the street to walk there &middot; <b>&uarr;/&darr;</b> or <b>W/S</b> step forward or back &middot; <b>&larr;/&rarr;</b> turn &middot; <b>Shift</b> walk faster &middot; <b>Esc</b> or &ldquo;Back to map&rdquo; returns to the map. The small map at the bottom left shows where you are; click it to jump."};
+function setModeUI(){const w=S.mode==="walk";$("backMap").style.display=w?"inline-block":"none";$("walkpad").style.display=w&&S.ui==="explore"?"flex":"none";
+  $("mini").style.display=w?"block":"none";$("helpT").textContent=w?"Street View controls":"Map controls";$("helpTxt").innerHTML=HELP[S.mode];layout();S.dirty=true}
+function layout(){const bh=$("bottom").offsetHeight,b=12+bh+10;
+  $("layersBtn").style.bottom=b+"px";$("layersPop").style.bottom=(b+72)+"px";$("navbox").style.bottom=b+"px";$("walkpad").style.bottom=b+"px";
+  $("mini").style.bottom=(b+72)+"px";$("help").style.bottom=b+"px";
+  // keep the info card clear of the nav cluster (bottom right)
+  const nbTop=innerHeight-b-$("navbox").offsetHeight,ic=$("infoCard"),top=parseFloat(getComputedStyle(ic).top)||58;ic.style.maxHeight=Math.max(160,nbTop-top-10)+"px"}
+if(window.ResizeObserver)new ResizeObserver(()=>layout()).observe(document.getElementById("bottom"));
+addEventListener("resize",layout);
+function buildUI(){
+  const sc=$("scen");sc.innerHTML="";S.man.scenarios.forEach((s,i)=>{const b=document.createElement("button");b.textContent=shortName(s);b.title=s.label;b.onclick=()=>{S.scen=i;refreshScen()};sc.appendChild(b)});
+  const gt=$("goto");for(const p of S.man.presets){const o=document.createElement("option");o.value="p"+S.man.presets.indexOf(p);o.textContent=p.name;gt.appendChild(o)}
+  const ow=document.createElement("option");ow.value="whole";ow.textContent="Whole superblock";gt.appendChild(ow);
+  gt.onchange=()=>{const v=gt.value;gt.value="";if(v==="whole"){flyTo({mode:"map",tx:(S.man.grid.x0+S.man.grid.x1)/2,ty:(S.man.grid.y0+S.man.grid.y1)/2,dist:1500,head:15,pitch:55});return}
+    const p=S.man.presets[+v.slice(1)];const pk=p.name.match(/at (\d\d):(\d\d)/);if(pk){const h=+pk[1]+pk[2]/60,k=S.man.times.findIndex(t=>Math.abs(t-h)<1e-3);if(k>=0){S.tf=k;onTime()}}
+    flyTo({mode:"walk",x:p.x,y:p.y,head:bestHeading(p.x,p.y),pitch:-5})};
+  // layer chips
+  const cp=$("chipsPed");for(const k of [...Object.keys(PED),"off"]){if(k==="dpet"&&S.man.scenarios.length<2)continue;const b=document.createElement("button");b.className="chip";b.dataset.ped=k;b.textContent=k==="off"?"Off":PED[k].chip;
+    b.onclick=()=>{if(k==="off")S.ped.on=false;else{S.ped.on=true;S.ped.layer=k}refreshLayers()};cp.appendChild(b)}
+  const cs=$("chipsSurf");for(const k of Object.keys(SURF)){const b=document.createElement("button");b.className="chip";b.dataset.surf=k;b.textContent=k==="solar"&&S.man.solarLabel?"Sunlight":SURF[k].chip;
+    if(k==="solar"&&S.man.solarLabel)b.title=S.man.solarLabel;b.onclick=()=>{S.surf=k;uploadWalls();refreshLayers()};cs.appendChild(b)}
+  $("pedAlpha").oninput=e=>{S.ped.alpha=+e.target.value;S.dirty=true};
+  $("layersBtn").onclick=e=>{e.stopPropagation();const p=$("layersPop");p.style.display=p.style.display==="block"?"none":"block"};
+  document.addEventListener("pointerdown",e=>{const p=$("layersPop");if(p.style.display==="block"&&!p.contains(e.target)&&!$("layersBtn").contains(e.target))p.style.display="none"},true);
+  // tour
+  const tb=$("tourBtns");TOUR.forEach((st,i)=>{const b=document.createElement("button");b.className="btn";b.innerHTML=`<span class="n">${i+1}</span>${st.title}`;
+    const ok=!st.requires||roleIndex(st.requires)>=0;b.disabled=!ok;if(!ok)b.title=st.disabledTip||"";b.onclick=()=>runTour(i);tb.appendChild(b)});
+  for(const b of $("modeSeg").children)b.onclick=()=>setUI(b.dataset.mode);
+  $("time").max=S.man.times.length-1;$("time").oninput=e=>{S.tf=+e.target.value;onTime()};
+  $("play").onclick=togglePlay;
+  $("bAbout").onclick=()=>$("about").style.display="flex";$("aboutClose").onclick=()=>$("about").style.display="none";$("about").onclick=e=>{if(e.target.id==="about")$("about").style.display="none"};
+  $("bHelp").onclick=()=>showHelp($("help").style.display!=="block");$("helpX").onclick=()=>showHelp(false);
+  $("infoX").onclick=()=>{S.cardOpen=false;S.probe=null;updateCard();S.dirty=true};
+  $("backMap").onclick=toMap;$("zIn").onclick=()=>zoomBtn(0.7);$("zOut").onclick=()=>zoomBtn(1/0.7);
+  $("compass").onclick=()=>{tween={k:S.mode==="walk"?"head":"mhead",from:S.mode==="walk"?S.head:S.map.head,t:0}};
+  for(const id of ["padF","padB"]){const el=$(id),k=id==="padF"?"KeyW":"KeyS";el.onpointerdown=e=>{S.keys[k]=true;el.setPointerCapture(e.pointerId)};el.onpointerup=el.onpointercancel=()=>{S.keys[k]=false}}
+  setupPeg();
+  const m=S.man;
+  $("tech").innerHTML=`Model: computational fluid dynamics (Ansys Fluent) for ${m.simDate}, using the earlier coarse-mesh runs of the published SAUC 2026 study (prototype). Felt temperature is PET for a standing adult (Höppe reference person). `+
+   (m.tmrtMode==="geometric"?"Sun and tree shade on people are computed from the building and tree geometry; air temperature, humidity and wind come from the CFD. In these runs the trees do not shade the CFD surfaces, so the surface layers look almost the same with and without trees. ":"Radiant heat is taken from the CFD radiation field. ")+
+   `Surface sunlight field: ${m.solarField||"none"}. Ground grid ${m.grid.cell} m. Data built ${m.built}.`;
+  if(store.get("expoHelpSeen")!=="1")showHelp(true);
+  refreshScen();refreshLayers();setModeUI();setUI("explore")}
+function showHelp(on){$("help").style.display=on?"block":"none";if(!on)store.set("expoHelpSeen","1")}
+function setUI(mode){S.ui=mode;document.body.classList.toggle("tour",mode==="tour");for(const b of $("modeSeg").children)b.classList.toggle("on",b.dataset.mode===mode);
+  const t=mode==="tour";$("tourBar").style.display=t?"flex":"none";$("layersBtn").style.display=t?"none":"flex";$("gotoRow").style.display=t?"none":"flex";
+  layout();if(t)$("layersPop").style.display="none";if(!t){S.tourStep=-1;$("caption").style.display="none";[...$("tourBtns").children].forEach(b=>b.classList.remove("on"));if(S.ref!==0){S.ref=0;if(S.man)updateFrames()}}
+  setModeUI()}
+function zoomBtn(f){if(S.mode==="map"){const r=cv.getBoundingClientRect();zoomMapAt(r.left+r.width/2,r.top+r.height/2,f)}else{S.fov=clamp(S.fov*f,25,100);S.dirty=true}}
+function refreshScen(){[...$("scen").children].forEach((b,i)=>b.classList.toggle("on",i===S.scen));return updateFrames()}
+function refreshLayers(){const P=PED[S.ped.layer],L=SURF[S.surf];
+  gl.bindTexture(gl.TEXTURE_2D,lutP);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,256,1,0,gl.RGBA,gl.UNSIGNED_BYTE,buildLUT(P.stops));
+  gl.bindTexture(gl.TEXTURE_2D,lutS);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,256,1,0,gl.RGBA,gl.UNSIGNED_BYTE,buildLUT(L.stops));
+  for(const b of $("chipsPed").children)b.classList.toggle("on",b.dataset.ped==="off"?!S.ped.on:(S.ped.on&&b.dataset.ped===S.ped.layer));
+  for(const b of $("chipsSurf").children)b.classList.toggle("on",b.dataset.surf===S.surf);
+  $("opRow").style.opacity=S.ped.on?1:.4;$("pedAlpha").disabled=!S.ped.on;
+  drawLegend();drawMiniBase();updateCard();S.dirty=true}
+function onTime(){$("time").value=S.tf;$("clock").firstChild.nodeValue=fmtClock(timeHour());const s=sunNow();
+  $("sunline").textContent=s.elev>0?`sun ${Math.round(s.elev)}° above the horizon`:"sun below the horizon";return updateFrames()}
+let playAcc=0;function togglePlay(){S.play=!S.play;$("play").innerHTML=S.play?"&#10074;&#10074;":"&#9654;";if(S.play&&S.tf>=S.man.times.length-1)S.tf=0}
+
+// one legend: the layer that colours the view (1.1 m sheet if on, else the surface layer)
+function activeLayer(){if(S.ped.on)return {L:PED[S.ped.layer],kind:"ped"};if(!SURF[S.surf].off)return {L:SURF[S.surf],kind:"surf"};return null}
+function drawLegend(){const a=activeLayer(),lg=$("legend");if(!a){lg.style.display="none";return}lg.style.display="flex";const L=a.L,lut=buildLUT(L.stops);
+  const name=L.diff?`PET change vs. ${shortName(S.man.scenarios[S.ref]).replace(/^\+ /,"").toLowerCase()}`:(L===SURF.solar&&S.man.solarLabel?S.man.solarLabel:L.name);
+  $("legT").textContent=name+(L.unit?` (${L.unit})`:"");
+  const c=$("legcv"),x=c.getContext("2d");for(let i=0;i<c.width;i++){const k=Math.round(i/(c.width-1)*255)*4;x.fillStyle=`rgb(${lut[k]},${lut[k+1]},${lut[k+2]})`;x.fillRect(i,0,1,c.height)}
+  const tk=$("legTicks");tk.innerHTML="";const ticks=L.classes?[18,23,29,35,41,50]:(L.q==="sun"?[0,1]:[0,.25,.5,.75,1].map(f=>lerp(L.lo,L.hi,f)));
+  for(const v of ticks){const sp=document.createElement("span");sp.style.left=clamp((v-L.lo)/(L.hi-L.lo),0,1)*100+"%";if(v===L.lo)sp.style.transform="none";if(v===L.hi)sp.style.transform="translateX(-100%)";
+    sp.textContent=L.q==="sun"?(v?"full sun":"shade"):(L.diff&&v>0?"+":"")+(L.q==="wind"?v.toFixed(1):Math.round(v));tk.appendChild(sp)}
+  $("legCls").textContent=L.classes?"comfortable 18–23 · slightly warm 23–29 · warm 29–35 · hot 35–41 · very hot >41":(L.diff?"blue = cooler · red = hotter":"");
+  $("legSrc").textContent=srcNote(a.kind)}
+
+// info card
+function cardPoint(){return S.mode==="walk"?S.pos:S.probe}
+function sampleAt(x,y){if(!cur.ready)return null;const k=cellIndex(x,y);if(k<0)return null;const q=S.man.q,w=cur.w,sw=cur.sw;
+  const A=ch=>lerp(val(cur.A0.data,k,ch),val(cur.A1.data,k,ch),w),B=ch=>lerp(val(cur.B0.data,k,ch),val(cur.B1.data,k,ch),w),C=ch=>lerp(val(cur.C0.data,k,ch),val(cur.C1.data,k,ch),sw);
+  const dq=(key,v)=>q[key][0]+v*(q[key][1]-q[key][0]);
+  return {k,pet:dq("pet",A(0)),tmrt:dq("tmrt",A(1)),tair:dq("tair",A(2)),wind:dq("wind",B(0)),sun:B(1),tsurf:dq("tsurf",C(0)),solar:q.solar?dq("solar",C(1)):NaN}}
+function petOf(sk,k){const a=cache.get(sk+"|A|"+cur.i0),b=cache.get(sk+"|A|"+cur.i1),q=S.man.q.pet;if(!a||!b)return null;return q[0]+lerp(val(a.data,k,0),val(b.data,k,0),cur.w)*(q[1]-q[0])}
+function classColor(v){const L=PED.pet,t=clamp((v-L.lo)/(L.hi-L.lo),0,1),k=Math.round(t*255)*4,l=buildLUT(L.stops);return `rgb(${l[k]},${l[k+1]},${l[k+2]})`}
+function diffText(dd){return Math.abs(dd)<0.05?"the same":`${Math.abs(dd).toFixed(1)} °C ${dd>0?"hotter":"cooler"}`}
+function updateCard(){if(!S.man)return;const card=$("infoCard"),p=cardPoint();
+  const show=S.cardOpen&&p;card.style.display=show?"block":"none";if(!show)return;
+  const [x,y]=p,s=sampleAt(x,y),sk=S.man.scenarios[S.scen];
+  $("infoWhere").textContent=(S.mode==="walk"?"Where you stand":"At this point")+` · ${shortName(sk).replace(/^\+ /,"")} · ${fmtClock(timeHour())}`;
+  if(!s||!isOutdoor(x,y)){$("infoBig").textContent="–";$("infoCls").style.display="none";$("infoSub").textContent=s?"This point is on a building.":"Outside the simulated area.";$("infoCmp").innerHTML="";$("infoTab").innerHTML="";drawChart();return}
+  const sunTxt=sunNow().elev<=0?"night":(s.sun>0.6?"in the sun":(s.sun>0.03?"under trees":"in shade"));
+  $("infoBig").textContent=s.pet.toFixed(1)+" °C";const c=$("infoCls");c.style.display="inline-block";c.textContent=petClass(s.pet);c.style.background=classColor(s.pet);
+  $("infoSub").textContent=`felt temperature (PET) · ${sunTxt}`;
+  let h="";for(const o of S.man.scenarios){if(o.key===sk.key)continue;const v=petOf(o.key,s.k);if(v===null)continue;const dd=v-s.pet;
+    h+=`<div>${cmpName(o)}: ${v.toFixed(1)} °C <span class="${dd>0.05?'warm':(dd<-0.05?'cool':'')}">(${diffText(dd)})</span></div>`}
+  $("infoCmp").innerHTML=h;
+  $("infoTab").innerHTML=`<tr><td>Air temperature</td><td>${s.tair.toFixed(1)} °C</td></tr><tr><td>Radiant heat (Tmrt)</td><td>${Math.round(s.tmrt)} °C</td></tr>
+   <tr><td>Wind</td><td>${s.wind.toFixed(1)} m/s</td></tr><tr><td>Ground surface</td><td>${Math.round(s.tsurf)} °C</td></tr>`+(isNaN(s.solar)?"":`<tr><td>Sunlight on the ground</td><td>${Math.round(s.solar)} W/m²</td></tr>`);
+  drawChart()}
+function drawChart(){const c=$("chart"),x=c.getContext("2d"),W=c.width,H=c.height,m=S.man,L={l:28,r:6,t:8,b:18};x.clearRect(0,0,W,H);
+  const t=m.times,t0=t[0],t1=t[t.length-1];let lo=1e9,hi=-1e9;for(const s of m.scenarios)for(const v of m.curves[s.key].pet_mean){lo=Math.min(lo,v);hi=Math.max(hi,v)}
+  lo=Math.floor(lo/5)*5;hi=Math.ceil(hi/5)*5;const X=v=>L.l+(v-t0)/(t1-t0)*(W-L.l-L.r),Y=v=>H-L.b-(v-lo)/(hi-lo)*(H-L.t-L.b);
+  x.font="10px system-ui";x.fillStyle="#aab3c2";x.strokeStyle="rgba(255,255,255,.12)";
+  for(let v=lo;v<=hi;v+=5){x.beginPath();x.moveTo(L.l,Y(v));x.lineTo(W-L.r,Y(v));x.stroke();x.fillText(v+"°",3,Y(v)+3)}
+  for(let h=Math.ceil(t0/3)*3;h<=t1;h+=3)x.fillText(String(h).padStart(2,"0")+"h",X(h)-9,H-5);
+  const cols=["#ff8a5c","#6fd3a0","#7fb2ff","#e9d16b"];
+  m.scenarios.forEach((s,i)=>{const v=m.curves[s.key].pet_mean;x.strokeStyle=cols[i%4];x.lineWidth=i===S.scen?2.6:1.4;x.beginPath();v.forEach((y,k)=>{k?x.lineTo(X(t[k]),Y(y)):x.moveTo(X(t[k]),Y(y))});x.stroke();x.fillStyle=cols[i%4];x.fillText(shortName(s).replace(/^\+ /,""),L.l+4,L.t+10+12*i)});
+  const th=timeHour();x.strokeStyle="#fff";x.lineWidth=1;x.beginPath();x.moveTo(X(th),L.t);x.lineTo(X(th),H-L.b);x.stroke();
+  const cs=m.curves[keyOf(S.scen)],k=Math.round(clamp(S.tf,0,t.length-1));
+  $("chartnote").textContent=`Whole superblock: average felt temperature on streets and squares. At ${fmtClock(th)}, ${Math.round(cs.frac35[k]*100)}% of the street area is above 35 °C.`}
+
+// mini-map (Street View only)
+const mini=$("minicv"),mctx=mini.getContext("2d"),mbase=document.createElement("canvas");
+function drawMiniBase(){if(!cur.ready||!S.staticData)return;const g=S.man.grid,W=Math.round(g.nx/3),H=Math.round(g.ny/3);mbase.width=W;mbase.height=H;
+  const c=mbase.getContext("2d"),im=c.createImageData(W,H),st=S.staticData,a=activeLayer()||{L:PED.pet,kind:"ped"},usePed=a.kind==="ped";
+  const L=a.L,lut=buildLUT(L.stops),q=S.man.q[L.q];
+  const src=usePed?(L.src===0?[cur.A0.data,cur.A1.data]:[cur.B0.data,cur.B1.data]):[cur.C0.data,cur.C1.data],w=usePed?cur.w:cur.sw,R=[cur.R0.data,cur.R1.data];
+  for(let r=0;r<H;r++)for(let cc=0;cc<W;cc++){const k=(r*3)*g.nx+cc*3,o=(r*W+cc)*4;
+    if(st[k*4+1]<128&&usePed){const v=110+Math.min(st[k*4],60)*1.6;im.data[o]=im.data[o+1]=im.data[o+2]=v;im.data[o+3]=255;continue}
+    let v;if(L.diff)v=(lerp(src[0][k*4],src[1][k*4],w)-lerp(R[0][k*4],R[1][k*4],w))/255*(q[1]-q[0]);else v=q[0]+lerp(src[0][k*4+L.ch],src[1][k*4+L.ch],w)/255*(q[1]-q[0]);
+    const t=Math.round(clamp((v-L.lo)/(L.hi-L.lo),0,1)*255)*4;im.data[o]=lut[t];im.data[o+1]=lut[t+1];im.data[o+2]=lut[t+2];im.data[o+3]=255}
+  c.putImageData(im,0,0)}
+function drawMini(){if(S.mode!=="walk")return;const g=S.man.grid,W=mini.width,H=mini.height;mctx.fillStyle="#222";mctx.fillRect(0,0,W,H);if(mbase.width)mctx.drawImage(mbase,0,0,W,H);
+  const px=x=>(x-g.x0)/(g.x1-g.x0)*W,py=y=>(g.y1-y)/(g.y1-g.y0)*H,[x,y]=S.pos,h=S.head*Math.PI/180,fv=S.fov*Math.PI/360;
+  mctx.fillStyle="rgba(255,255,255,.3)";mctx.beginPath();mctx.moveTo(px(x),py(y));mctx.arc(px(x),py(y),22,-Math.PI/2+h-fv,-Math.PI/2+h+fv);mctx.closePath();mctx.fill();
+  mctx.fillStyle="#ffcf6b";mctx.strokeStyle="#000";mctx.lineWidth=1.5;mctx.beginPath();mctx.arc(px(x),py(y),4.5,0,7);mctx.fill();mctx.stroke();
+  mctx.fillStyle="#fff";mctx.font="bold 10px system-ui";mctx.fillText("N ↑",W-24,12)}
+mini.onclick=e=>{const r=mini.getBoundingClientRect(),g=S.man.grid,x=g.x0+(e.clientX-r.left)/r.width*(g.x1-g.x0),y=g.y1-(e.clientY-r.top)/r.height*(g.y1-g.y0);goTo(x,y,bestHeading(x,y))};
+
+// ============================================================================ tour
+function placeOf(st){const P=S.man.presets;
+  if(typeof st.place==="object")return st.place;
+  if(st.place==="hottest")return P.find(p=>/^Hottest/.test(p.name))||P[0];
+  if(st.place==="cooling")return P.find(p=>/^Most cooling/.test(p.name))||P[0];
+  return null}
+async function bestSpot(aKey,bKey,ti){   // most negative smoothed PET(a) - PET(b) at time index ti, computed from the images
+  const A=await frame(aKey,"A",ti),B=await frame(bKey,"A",ti),g=S.man.grid,st=S.staticData,s=3;let best=null,bv=1e9;
+  for(let r=6;r<g.ny-6;r+=s)for(let c=6;c<g.nx-6;c+=s){let sum=0,n=0;for(let dr=-3;dr<=3;dr+=3)for(let dc=-3;dc<=3;dc+=3){const k=(r+dr)*g.nx+c+dc;if(st[k*4+1]<128)continue;sum+=A.data[k*4]-B.data[k*4];n++}
+    if(n<7)continue;const v=sum/n;if(v<bv){bv=v;best=[g.x0+(c+.5)*g.cell,g.y1-(r+.5)*g.cell]}}
+  return best?{x:best[0],y:best[1]}:{x:(g.x0+g.x1)/2,y:(g.y0+g.y1)/2}}
+function timeIndex(t){if(t==="peak")return S.man.peakIndex||0;let b=0,bd=1e9;S.man.times.forEach((h,i)=>{if(Math.abs(h-t)<bd){bd=Math.abs(h-t);b=i}});return b}
+async function runTour(i){const st=TOUR[i];if(st.requires&&roleIndex(st.requires)<0)return;
+  S.tourStep=i;[...$("tourBtns").children].forEach((b,j)=>b.classList.toggle("on",j===i));$("caption").style.display="block";$("caption").textContent="…";
+  const si=roleIndex(st.scenario),ri=st.ref?roleIndex(st.ref):0;S.scen=si<0?0:si;S.ref=ri<0?0:ri;
+  S.ped.on=st.layer!=="off";if(st.layer!=="off")S.ped.layer=st.layer;S.surf=st.surf||"none";S.tf=timeIndex(st.time);
+  let p=placeOf(st);if(!p&&st.place==="paintBest")p=await bestSpot(keyOf(S.scen),keyOf(S.ref),S.tf);
+  refreshLayers();await onTime();await refreshScen();uploadWalls();
+  const head=bestHeading(p.x,p.y);
+  if(st.view==="oblique")await flyTo({mode:"map",tx:p.x,ty:p.y,dist:260,head,pitch:38});else await flyTo({mode:"walk",x:p.x,y:p.y,head,pitch:st.pitch||0});
+  if(st.view==="oblique"){S.probe=nearestOutdoor(p.x,p.y);S.cardOpen=true}
+  await updateFrames();
+  const q=cardPoint(),s=sampleAt(q[0],q[1]),v={clock:fmtClock(timeHour()),pet:"–",cls:"",frac35:Math.round(S.man.curves[keyOf(S.scen)].frac35[S.tf]*100)};
+  if(s){v.pet=Math.round(s.pet);v.cls=petClass(s.pet);const r=petOf(keyOf(S.ref),s.k);if(r!==null){const d=s.pet-r;v.dAbs=Math.abs(Math.round(d));v.dWord=d<0?"cooler":"hotter";v.dSigned=(d>0?"+":"")+Math.round(d);v.ref=Math.round(r)}}
+  $("caption").textContent=st.caption(v);S.dirty=true;return v}
+
+// ============================================================================ input
+const ptrs=new Map();let drag=null,pinch=null;
+function isRotateDrag(e){return e.button===2||e.ctrlKey||e.metaKey||(e.button===0&&e.altKey)}
+cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});fly=null;
+  if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),mx:(a.x+b.x)/2,my:(a.y+b.y)/2};drag=null;return}
+  drag={x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,t:performance.now(),rot:S.mode==="map"&&isRotateDrag(e),btn:e.button,moved:false};if(!S.pick)cv.classList.add("drag")});
+cv.addEventListener("pointermove",e=>{if(!ptrs.has(e.pointerId))return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pinch&&ptrs.size===2){const [a,b]=[...ptrs.values()],d=Math.hypot(a.x-b.x,a.y-b.y),mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+    if(S.mode==="map"){panMap(pinch.mx,pinch.my,mx,my);zoomMapAt(mx,my,pinch.d/Math.max(d,1))}else{S.fov=clamp(S.fov*pinch.d/Math.max(d,1),25,100);S.dirty=true}
+    pinch={d,mx,my};return}
+  if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.hypot(e.clientX-drag.x0,e.clientY-drag.y0)>4)drag.moved=true;
+  if(S.mode==="walk"){const k=S.fov/cv.clientHeight;S.head=wrap360(S.head+dx*k);S.pitch=clamp(S.pitch-dy*k,-70,75)}
+  else if(drag.rot){S.map.head=wrap360(S.map.head-dx*0.3);S.map.pitch=clamp(S.map.pitch+dy*0.25,20,89)}
+  else panMap(drag.x,drag.y,e.clientX,e.clientY);
+  drag.x=e.clientX;drag.y=e.clientY;S.dirty=true});
+let lastClick=0;
+function endPtr(e){ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;cv.classList.remove("drag");
+  if(drag&&!drag.moved&&performance.now()-drag.t<500&&drag.btn===0){const p=groundAt(e.clientX,e.clientY);
+    if(S.pick){if(p)enterStreet(p[0],p[1])}
+    else if(S.mode==="map"&&p){const now=performance.now();if(now-lastClick>350){S.probe=p;S.cardOpen=true;updateCard();S.dirty=true}lastClick=now}}
+  drag=null}
+cv.addEventListener("pointerup",endPtr);cv.addEventListener("pointercancel",endPtr);
+cv.addEventListener("contextmenu",e=>e.preventDefault());
+cv.addEventListener("wheel",e=>{e.preventDefault();fly=null;
+  const dy=e.deltaMode===1?e.deltaY*40:e.deltaY,dx=e.deltaMode===1?e.deltaX*40:e.deltaX;
+  const mouseWheel=e.deltaMode!==0||(e.deltaX===0&&Math.abs(e.deltaY)>=50);   // notch wheel; small or two-axis deltas = touchpad
+  if(S.mode==="walk"){S.fov=clamp(S.fov*Math.exp(dy*(e.ctrlKey?0.01:0.0012)),25,100);S.dirty=true;return}
+  if(e.ctrlKey)zoomMapAt(e.clientX,e.clientY,Math.exp(dy*0.01));
+  else if(mouseWheel)zoomMapAt(e.clientX,e.clientY,Math.exp(dy*0.0015));
+  else panMap(e.clientX,e.clientY,e.clientX-dx,e.clientY-dy);
+},{passive:false});
+cv.addEventListener("dblclick",e=>{const p=groundAt(e.clientX,e.clientY);if(!p)return;
+  if(S.mode==="map"){tween={k:"zoom",x:e.clientX,y:e.clientY,t:0}}
+  else{if(Math.hypot(p[0]-S.pos[0],p[1]-S.pos[1])<500)goTo(p[0],p[1],S.head)}});
+function setupPeg(){const peg=$("peg"),ghost=$("pegGhost");let pd=null;
+  peg.addEventListener("pointerdown",e=>{pd={x:e.clientX,y:e.clientY,moved:false};peg.setPointerCapture(e.pointerId)});
+  peg.addEventListener("pointermove",e=>{if(!pd)return;if(Math.hypot(e.clientX-pd.x,e.clientY-pd.y)>6)pd.moved=true;
+    if(pd.moved){ghost.style.display="block";ghost.style.left=(e.clientX-15)+"px";ghost.style.top=(e.clientY-38)+"px"}});
+  peg.addEventListener("pointerup",e=>{ghost.style.display="none";if(!pd)return;
+    if(pd.moved){const el=document.elementFromPoint(e.clientX,e.clientY);if(el===cv){if(S.mode==="walk")toMap();const p=groundAt(e.clientX,e.clientY);if(p)enterStreet(p[0],p[1])}}
+    else{if(S.mode==="walk")toMap();setPick(!S.pick)}pd=null})}
+addEventListener("keydown",e=>{if(e.target.tagName==="SELECT")return;S.keys[e.code]=true;
+  if(e.code==="Space"){e.preventDefault();togglePlay()}
+  if(e.code==="KeyT"){S.scen=(S.scen+1)%S.man.scenarios.length;refreshScen()}
+  if(e.code==="Escape"){if($("layersPop").style.display==="block")$("layersPop").style.display="none";else if(S.pick)setPick(false);else if($("help").style.display==="block")showHelp(false);
+    else if($("about").style.display==="flex")$("about").style.display="none";else toMap()}
+  if(S.mode==="map"&&(e.key==="+"||e.key==="="))zoomBtn(0.7);if(S.mode==="map"&&(e.key==="-"||e.key==="_"))zoomBtn(1/0.7);
+  if(e.code.startsWith("Arrow"))e.preventDefault()});
+addEventListener("keyup",e=>{S.keys[e.code]=false});addEventListener("blur",()=>{S.keys={}});
+
+// ============================================================================ loop
+function resize(){const dpr=Math.min(devicePixelRatio||1,1.5),w=Math.round(innerWidth*dpr),h=Math.round(innerHeight*dpr);if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;S.dirty=true}}
+function skyCols(el){const day=smooth(-6,12,el),dusk=Math.exp(-Math.pow((el-2)/7,2));
+  const zen=[lerp(.02,.27,day),lerp(.03,.50,day),lerp(.08,.85,day)],hor=[lerp(.10,.74,day)+.25*dusk,lerp(.12,.84,day)+.05*dusk,lerp(.20,.95,day)-.15*dusk];return {zen,hor:hor.map(v=>clamp(v,0,1)),day}}
+let lastT=performance.now(),cardAcc=0;
+function step(now){const dt=Math.min((now-lastT)/1000,0.1);lastT=now;resize();const k=S.keys;
+  if(fly){fly.t=Math.min(1,fly.t+dt/fly.dur);const e=smooth(0,1,fly.t),f=fly.from,t=fly.to,m=S.map;
+    m.tx=lerp(f.tx,t.tx,e);m.ty=lerp(f.ty,t.ty,e);m.dist=Math.exp(lerp(Math.log(f.dist),Math.log(t.dist),e))+fly.lift*Math.sin(Math.PI*e);
+    m.head=angLerp(f.head,t.head,e);m.pitch=lerp(f.pitch,t.pitch,e);clampMap();S.dirty=true;if(fly.t>=1){const d=fly.done;fly=null;d()}}
+  if(S.mode==="walk"){const sp=(k.ShiftLeft||k.ShiftRight)?14:4.5;let f=0,s=0;
+    if(k.KeyW||k.ArrowUp)f+=1;if(k.KeyS||k.ArrowDown)f-=1;if(k.KeyD)s+=1;if(k.KeyA)s-=1;
+    if(k.ArrowLeft||k.KeyQ){S.head=wrap360(S.head-70*dt);S.dirty=true}if(k.ArrowRight||k.KeyE){S.head=wrap360(S.head+70*dt);S.dirty=true}
+    if(f||s){const h=S.head*Math.PI/180,vx=(Math.sin(h)*f+Math.cos(h)*s)*sp*dt,vy=(Math.cos(h)*f-Math.sin(h)*s)*sp*dt;
+      if(isOutdoor(S.pos[0]+vx,S.pos[1]))S.pos[0]+=vx;if(isOutdoor(S.pos[0],S.pos[1]+vy))S.pos[1]+=vy;S.dirty=true;glide=null}
+    if(glide){glide.t=Math.min(1,glide.t+dt/0.9);const e=smooth(0,1,glide.t);S.pos=[lerp(glide.from[0],glide.to[0],e),lerp(glide.from[1],glide.to[1],e)];
+      if(glide.head!==null){const d=((glide.head-S.head+540)%360)-180;S.head=wrap360(S.head+d*Math.min(1,dt*4))}if(glide.t>=1)glide=null;S.dirty=true}}
+  else if(!fly){const r=cv.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,ps=500*dt;
+    if(k.ArrowUp||k.KeyW)panMap(cx,cy,cx,cy+ps);if(k.ArrowDown||k.KeyS)panMap(cx,cy,cx,cy-ps);if(k.ArrowLeft||k.KeyA)panMap(cx,cy,cx+ps,cy);if(k.ArrowRight||k.KeyD)panMap(cx,cy,cx-ps,cy);
+    if(k.KeyQ){S.map.head=wrap360(S.map.head-60*dt);S.dirty=true}if(k.KeyE){S.map.head=wrap360(S.map.head+60*dt);S.dirty=true}}
+  if(tween){tween.t=Math.min(1,tween.t+dt/0.35);
+    if(tween.k==="zoom"){zoomMapAt(tween.x,tween.y,Math.pow(0.5,dt/0.35))}
+    else{const v=tween.from>180?lerp(tween.from,360,smooth(0,1,tween.t)):lerp(tween.from,0,smooth(0,1,tween.t));if(tween.k==="head")S.head=wrap360(v);else S.map.head=wrap360(v)}
+    if(tween.t>=1)tween=null;S.dirty=true}
+  if(S.play){playAcc+=dt;if(playAcc>0.05){S.tf+=playAcc*1.2;playAcc=0;if(S.tf>=S.man.times.length-1){S.tf=S.man.times.length-1;togglePlay()}onTime()}}
+  cardAcc+=dt;if(S.dirty&&cardAcc>0.15&&S.mode==="walk"){cardAcc=0;updateCard()}
+  if(S.dirty&&cur.ready){render();drawMini();placePin();$("compSvg").style.transform=`rotate(${-(S.mode==="walk"?S.head:S.map.head)}deg)`;S.dirty=false}
+  requestAnimationFrame(step)}
+function placePin(){const pin=$("pin");if(S.mode!=="map"||!S.cardOpen||!S.probe){pin.style.display="none";return}const p=project(S.probe[0],S.probe[1],1.1);
+  if(!p){pin.style.display="none";return}pin.style.display="block";pin.style.left=p[0]+"px";pin.style.top=p[1]+"px"}
+function bindTex(u,t,P,n){if(P.u[n]===undefined||P.u[n]===null)return;gl.activeTexture(gl.TEXTURE0+u);gl.bindTexture(gl.TEXTURE_2D,t);gl.uniform1i(P.u[n],u)}
+function render(){const c=camera(),sun=sunNow(),sk=skyCols(sun.elev),g=S.man.grid,P=PED[S.ped.layer],L=SURF[S.surf],qp=S.man.q[P.q],qs=S.man.q[L.q]||[0,1];
+  const fogd=S.mode==="walk"?1/1800:1/12000,day=sun.elev>0?smooth(0,10,sun.elev):0;
+  gl.viewport(0,0,cv.width,cv.height);gl.clearColor(...sk.hor,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  gl.disable(gl.DEPTH_TEST);gl.disable(gl.BLEND);gl.useProgram(SKY.p);gl.uniformMatrix4fv(SKY.u.u_ivp,false,c.IVP);gl.uniform3fv(SKY.u.u_cam,c.eye);
+  gl.uniform3fv(SKY.u.u_sun,sun.dir);gl.uniform3fv(SKY.u.u_zen,sk.zen);gl.uniform3fv(SKY.u.u_hor,sk.hor);gl.uniform1f(SKY.u.u_day,sun.elev>-1?sk.day:0);gl.bindVertexArray(vaoS);gl.drawArrays(gl.TRIANGLES,0,3);
+  gl.enable(gl.DEPTH_TEST);gl.depthMask(true);
+  const common=Pr=>{gl.uniformMatrix4fv(Pr.u.u_vp,false,c.VP);gl.uniform3fv(Pr.u.u_cam,c.eye);gl.uniform3fv(Pr.u.u_fog,sk.hor);gl.uniform1f(Pr.u.u_fogd,fogd);
+    gl.uniform3fv(Pr.u.u_sun,sun.elev>0?sun.dir:[0,0,1]);gl.uniform1f(Pr.u.u_day,day);if(Pr.u.u_grid)gl.uniform4f(Pr.u.u_grid,g.x0,g.y0,g.x1,g.y1)};
+  const surfU=Pr=>{gl.uniform1f(Pr.u.u_smix,cur.sw);gl.uniform1f(Pr.u.u_sOn,L.off?0:1);gl.uniform1f(Pr.u.u_sch,L.ch);gl.uniform2f(Pr.u.u_sq,qs[0],qs[1]);gl.uniform2f(Pr.u.u_sdisp,L.lo,L.hi);
+    bindTex(4,cur.C0.tex,Pr,"u_C0");bindTex(5,cur.C1.tex,Pr,"u_C1");bindTex(9,lutS,Pr,"u_lutS");bindTex(6,stTex,Pr,"u_st")};
+  gl.disable(gl.CULL_FACE);gl.useProgram(GROUND.p);common(GROUND);surfU(GROUND);
+  bindTex(2,cur.B0.tex,GROUND,"u_B0");bindTex(3,cur.B1.tex,GROUND,"u_B1");bindTex(7,phTex,GROUND,"u_ph");
+  gl.uniform1f(GROUND.u.u_mix,cur.w);gl.uniform1f(GROUND.u.u_photo,S.photo?1:0);const o=EXPO.ortho||{x0:0,y0:0,x1:1,y1:1};gl.uniform4f(GROUND.u.u_orect,o.x0,o.y0,o.x1,o.y1);
+  gl.bindVertexArray(vaoG);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.useProgram(BLDG.p);common(BLDG);surfU(BLDG);gl.bindVertexArray(vaoB);gl.drawElements(gl.TRIANGLES,nIdxB,gl.UNSIGNED_INT,0);
+  if(S.man.scenarios[S.scen].trees){gl.useProgram(TREE.p);common(TREE);gl.uniform1f(TREE.u.u_part,0);gl.bindVertexArray(vaoT);gl.drawElementsInstanced(gl.TRIANGLES,crownN,gl.UNSIGNED_SHORT,0,nT);
+    gl.disable(gl.CULL_FACE);gl.uniform1f(TREE.u.u_part,1);gl.bindVertexArray(vaoTr);gl.drawElementsInstanced(gl.TRIANGLES,trunkN,gl.UNSIGNED_SHORT,0,nT)}
+  if(S.ped.on){gl.disable(gl.CULL_FACE);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
+    gl.useProgram(PEDP.p);common(PEDP);
+    bindTex(0,cur.A0.tex,PEDP,"u_A0");bindTex(1,cur.A1.tex,PEDP,"u_A1");bindTex(2,cur.B0.tex,PEDP,"u_B0");bindTex(3,cur.B1.tex,PEDP,"u_B1");
+    bindTex(4,cur.R0.tex,PEDP,"u_R0");bindTex(5,cur.R1.tex,PEDP,"u_R1");bindTex(6,stTex,PEDP,"u_st");bindTex(8,lutP,PEDP,"u_lutP");
+    gl.uniform1f(PEDP.u.u_mix,cur.w);gl.uniform1f(PEDP.u.u_alpha,S.ped.alpha);gl.uniform1f(PEDP.u.u_src,P.src);gl.uniform1f(PEDP.u.u_ch,P.ch);gl.uniform1f(PEDP.u.u_diff,P.diff?1:0);
+    gl.uniform2f(PEDP.u.u_q,qp[0],qp[1]);gl.uniform2f(PEDP.u.u_disp,P.lo,P.hi);gl.bindVertexArray(vaoP);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    gl.depthMask(true);gl.disable(gl.BLEND)}
+  gl.bindVertexArray(null)}
+
+// ============================================================================ boot
+(async function boot(){const err=m=>{$("err").textContent=m;console.error(m)};
+  try{
+    if(!gl)throw new Error("This browser cannot show 3D graphics (WebGL2). Please use a current Chrome, Edge or Firefox.");
+    if(typeof DecompressionStream==="undefined")throw new Error("This browser is too old (no DecompressionStream). Use a current Chrome, Edge or Firefox.");
+    if(!window.EXPO||!EXPO.manifest)throw new Error("data/manifest.js is missing. Run scripts/build_viz_data.py first.");
+    S.man=EXPO.manifest;
+    const files=["data/geometry.js","data/ortho.js",...S.man.scenarios.map(s=>`data/frames_${s.key}.js`)];
+    let n=0;if(!window.EXPO_INLINE)for(const f of files){try{await loadScript(f)}catch(e){if(!f.includes("ortho"))throw e}n++;$("lbar").style.width=(n/files.length*80)+"%"}
+    if(!EXPO.frames[S.man.scenarios[0].key].imgC)throw new Error("The data files are from an older converter version. Re-run scripts/build_viz_data.py.");
+    lutP=tex(256,1,buildLUT(HEAT));lutS=tex(256,1,buildLUT(HEAT));
+    await uploadGeometry();$("lbar").style.width="92%";
+    const p=S.man.presets[0];S.pos=[p.x,p.y];S.head=bestHeading(p.x,p.y);const g=S.man.grid;S.map.tx=(g.x0+g.x1)/2;S.map.ty=(g.y0+g.y1)/2;
+    S.tf=S.man.peakIndex||0;buildUI();onTime();await updateFrames();
+    $("loading").style.display="none";layout();requestAnimationFrame(step);
+    window.V={S,TOUR,enterStreet,toMap,refreshLayers,refreshScen,onTime,updateFrames,zoomMapAt,panMap,groundAt,setPick,bestHeading,uploadWalls,runTour,setUI,showHelp,activeLayer};window.__viewerReady=true;
+  }catch(e){err(e.message||String(e));window.__viewerError=String(e)}})();
+</script>
+
+<div id="protoNotice" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(10,14,22,.55)">
+  <div style="max-width:560px;margin:16px;padding:18px 20px;border-radius:12px;background:#1d2330;color:#e9edf3;font:14px/1.55 system-ui,sans-serif">
+    <div style="font-size:16px;font-weight:600;margin-bottom:6px">Prototype</div>
+    <div>Prototype for discussion. It shows an earlier simulation of 30 July 2026 in the Poblenou superblock (Yamada et al. 2026, Street Art &amp; Urban Creativity 12(5), <a href="https://doi.org/10.66838/sauc.6427" target="_blank" rel="noopener" style="color:#9cc7ff">doi:10.66838/sauc.6427</a>). Known limits: tree shade enters only the 1.1 m felt temperature, not the surface temperatures; roofs receive no sunlight in these exports; the simulation runs about 3&ndash;4 &deg;C warm at noon compared with street measurements. New simulations will replace these results.</div>
+    <button id="protoOk" class="btn" style="margin-top:12px">Got it</button>
+  </div>
+</div>
+<script>
+(function(){var n=document.getElementById("protoNotice");document.getElementById("protoOk").onclick=function(){n.style.display="none"};
+n.onclick=function(e){if(e.target===n)n.style.display="none"};})();
+</script>
+</body>
+</html>
