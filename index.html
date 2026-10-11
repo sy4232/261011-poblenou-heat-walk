@@ -651,7 +651,7 @@ async function bestSpot(aKey,bKey,ti){   // most negative smoothed PET(a) - PET(
     if(n<7)continue;const v=sum/n;if(v<bv){bv=v;best=[g.x0+(c+.5)*g.cell,g.y1-(r+.5)*g.cell]}}
   return best?{x:best[0],y:best[1]}:{x:(g.x0+g.x1)/2,y:(g.y0+g.y1)/2}}
 function timeIndex(t){if(t==="peak")return S.man.peakIndex||0;let b=0,bd=1e9;S.man.times.forEach((h,i)=>{if(Math.abs(h-t)<bd){bd=Math.abs(h-t);b=i}});return b}
-async function runTour(i){const st=TOUR[i];if(st.requires&&roleIndex(st.requires)<0)return;
+async function runTour(i){const st=TOUR[i];if(st.requires&&roleIndex(st.requires)<0)return;if(S.play)togglePlay();   // a tour step holds its time
   S.tourStep=i;[...$("tourBtns").children].forEach((b,j)=>b.classList.toggle("on",j===i));$("caption").style.display="block";$("caption").textContent="…";
   const si=roleIndex(st.scenario),ri=st.ref?roleIndex(st.ref):0;S.scen=si<0?0:si;S.ref=ri<0?0:ri;
   S.ped.on=st.layer!=="off";if(st.layer!=="off")S.ped.layer=st.layer;S.surf=st.surf||"none";S.tf=timeIndex(st.time);
@@ -784,8 +784,13 @@ function render(){const c=camera(),sun=sunNow(),sk=skyCols(sun.elev),g=S.man.gri
     lutP=tex(256,1,buildLUT(HEAT));lutS=tex(256,1,buildLUT(HEAT));
     await uploadGeometry();$("lbar").style.width="92%";
     const p=S.man.presets[0];S.pos=[p.x,p.y];S.head=bestHeading(p.x,p.y);const g=S.man.grid;S.map.tx=(g.x0+g.x1)/2;S.map.ty=(g.y0+g.y1)/2;
-    S.tf=S.man.peakIndex||0;buildUI();onTime();await updateFrames();
+    // defaults (2026-10-11): open on today's street trees, compared with no trees; the day plays from the first frame
+    {const ti=roleIndex("trees"),bi=roleIndex("base");S.scen=ti<0?0:ti;S.ref=bi<0?0:bi}
+    S.tf=0;buildUI();onTime();await updateFrames();
     $("loading").style.display="none";layout();requestAnimationFrame(step);
+    // autoplay: start now, or when a start-up notice (public copy) is dismissed
+    if(document.getElementById("protoNotice")&&document.getElementById("protoNotice").style.display!=="none")window.__startPlay=()=>{if(!S.play)togglePlay()};
+    else if(!S.play)togglePlay();
     window.V={S,TOUR,enterStreet,toMap,refreshLayers,refreshScen,onTime,updateFrames,zoomMapAt,panMap,groundAt,setPick,bestHeading,uploadWalls,runTour,setUI,showHelp,activeLayer};window.__viewerReady=true;
   }catch(e){err(e.message||String(e));window.__viewerError=String(e)}})();
 </script>
@@ -798,8 +803,9 @@ function render(){const c=camera(),sun=sunNow(),sk=skyCols(sun.elev),g=S.man.gri
   </div>
 </div>
 <script>
-(function(){var n=document.getElementById("protoNotice");document.getElementById("protoOk").onclick=function(){n.style.display="none"};
-n.onclick=function(e){if(e.target===n)n.style.display="none"};})();
+(function(){var n=document.getElementById("protoNotice");function done(){n.style.display="none";if(window.__startPlay)window.__startPlay()}
+document.getElementById("protoOk").onclick=done;
+n.onclick=function(e){if(e.target===n)done()};})();
 </script>
 </body>
 </html>
