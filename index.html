@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Poblenou Heat Walk</title>
 <meta name="robots" content="noindex, nofollow">
 <style>
@@ -11,7 +11,7 @@
   --line:rgba(255,255,255,.14); --acc:#ffb347; --good:#6fd3a0; --warm:#ff8a7a;
 }
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;overflow:hidden;background:#0b0e14;color:var(--ink);
+html,body{margin:0;height:100%;height:100dvh;overflow:hidden;overscroll-behavior:none;background:#0b0e14;color:var(--ink);
   font:14px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 #gl{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none}
 #gl.drag{cursor:grabbing} #gl.pick{cursor:crosshair}
@@ -103,6 +103,58 @@ body.tour #infoCard{top:150px}
 #loading .bar i{display:block;height:100%;width:0;background:var(--acc)}
 #err{color:#ff9b8f;max-width:520px;text-align:center}
 @media (max-width:900px){#legSrc,#legCls{display:none}#caption{max-width:calc(100vw - 40px)}}
+button,select,.chip{touch-action:manipulation}
+.sh,.grab,#bMenu,#menuPop{display:none}
+/* ---------------- phone layout (body.phone: width <= 700 px, or a touch screen <= 520 px high) ---------------- */
+body.phone{font-size:13px}
+body.phone .lg{display:none} body.phone .sh{display:inline}
+body.phone #card{top:calc(env(safe-area-inset-top) + 6px);left:calc(env(safe-area-inset-left) + 6px);right:calc(env(safe-area-inset-right) + 6px);
+  max-width:none;flex-direction:row;flex-wrap:nowrap;align-items:center;gap:6px;padding:4px 6px;border-radius:12px}
+body.phone #card h1{display:contents}
+body.phone #card h1>span:first-child{display:none;font-size:13px;white-space:nowrap;order:0}
+body.phone #card .row{flex-wrap:nowrap;order:1}
+body.phone #modeSeg{order:2;margin-left:auto} body.phone #modeSeg button.on{display:none}
+body.phone #gotoRow{order:3} body.phone #bMenu{order:4}
+body.phone .seg button{min-height:40px;padding:6px 9px;font-size:13px}
+body.phone #goto{width:44px;height:44px;padding:0;color:transparent;-webkit-appearance:none;appearance:none;cursor:pointer;
+  background:var(--panel2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z' fill='%23ffe2b0'/%3E%3C/svg%3E") center/22px no-repeat}
+body.phone #goto option{color:#f2f4f8;background:#1d2330}
+body.phone #bMenu{display:inline-flex;width:44px;height:44px;padding:0;align-items:center;justify-content:center;font-size:20px}
+body.phone #tr{display:none}
+#menuPop{position:fixed;flex-direction:column;gap:6px;padding:8px;z-index:12}
+body.phone #menuPop.open{display:flex} body.phone #menuPop .btn{min-height:44px;min-width:120px;text-align:left}
+body.phone #bottom{left:calc(env(safe-area-inset-left) + 6px);right:calc(env(safe-area-inset-right) + 6px);bottom:calc(env(safe-area-inset-bottom) + 6px);padding:5px 8px;gap:2px}
+body.phone #legend{gap:6px;font-size:10.5px} body.phone #legT{font-size:11px} body.phone #legBarWrap{min-width:0}
+body.phone #legCls,body.phone #legSrc,body.phone #sunline,body.phone #clock small{display:none}
+body.phone #timebar{gap:8px} body.phone #clock{font-size:17px;min-width:46px}
+body.phone #play{min-width:44px;min-height:44px} body.phone #time{height:44px}
+body.phone #layersBtn{left:calc(env(safe-area-inset-left) + 6px);width:52px;height:52px;font-size:10px}
+body.phone #navbox{right:calc(env(safe-area-inset-right) + 6px);gap:6px}
+body.phone #compass{width:44px;height:44px} body.phone #peg{width:44px;height:44px}
+body.phone #navbox .sq{width:44px;height:44px}
+body.touch #zIn,body.touch #zOut{display:none}
+body.phone #backMap{min-height:44px;padding:6px 10px}
+body.phone #walkpad{display:none!important}
+body.phone #mini{left:calc(env(safe-area-inset-left) + 6px);padding:3px}
+body.phone #mini canvas{width:118px;height:110px}
+/* bottom sheets */
+body.phone #infoCard,body.phone #layersPop{left:0;right:0;top:auto;width:auto;max-width:none;max-height:45vh;max-height:45dvh;overflow:auto;
+  border-radius:16px 16px 0 0;padding:20px 14px 12px;padding-left:calc(env(safe-area-inset-left) + 14px);padding-right:calc(env(safe-area-inset-right) + 14px);z-index:6}
+body.phone .grab{display:block;position:absolute;top:7px;left:50%;width:44px;height:5px;margin-left:-22px;border-radius:3px;background:#5a6272}
+body.phone #infoCard .x{width:44px;height:44px;top:0;right:0}
+body.phone #infoBig{font-size:28px} body.phone .chip{min-height:40px;padding:8px 12px}
+body.phone #opRow input{height:36px}
+body.phone #help{width:calc(100% - 12px);font-size:13px}
+/* tour on phones */
+body.phone #tourBar{top:60px;left:6px;right:6px;transform:none;gap:6px}
+body.phone #tourBtns{gap:6px;justify-content:center;flex-wrap:nowrap}
+body.phone #tourBtns .btn{font-size:13px;padding:6px 10px;min-height:44px;gap:6px;border-radius:10px}
+body.phone #tourBtns .btn .n{width:22px;height:22px}
+body.phone #caption{max-width:100%;font-size:14px;line-height:1.35;padding:7px 10px}
+body.phone.tour #card h1{font-size:13px} body.phone.tour .seg button{font-size:13px;padding:6px 9px} body.phone.tour #infoBig{font-size:30px}
+body.phone.tour #infoCmp{font-size:13.5px} body.phone.tour #clock{font-size:17px} body.phone.tour #legend{font-size:10.5px} body.phone.tour #legT{font-size:11px}
+@media (min-width:430px){body.phone #card h1>span:first-child{display:inline}}
+
 </style>
 </head>
 <body>
@@ -113,15 +165,17 @@ body.tour #infoCard{top:150px}
 <div id="card" class="panel">
   <h1><span>Poblenou heat walk <small style="font-size:11px;font-weight:500;padding:2px 6px;border-radius:6px;background:#4a3a12;color:#ffd98a;vertical-align:2px">Prototype</small></span><span class="seg" id="modeSeg"><button data-mode="tour">Tour</button><button data-mode="explore" class="on">Explore</button></span></h1>
   <div class="row"><span class="seg" id="scen"></span></div>
-  <div class="row" id="gotoRow"><select id="goto" title="Go to a place"><option value="">Go to&hellip;</option></select></div>
+  <div class="row" id="gotoRow"><select id="goto" title="Go to a place" aria-label="Go to a place"><option value="">Go to&hellip;</option></select></div>
+  <button class="btn" id="bMenu" title="Help and About" aria-label="Menu">&#9776;</button>
 </div>
 <div id="tr"><button class="btn" id="bHelp">Help</button><button class="btn" id="bAbout">About</button></div>
+<div id="menuPop" class="panel"><button class="btn" id="mHelp">Help</button><button class="btn" id="mAbout">About</button></div>
 
 <!-- tour -->
 <div id="tourBar"><div id="tourBtns"></div><div id="caption" class="panel"></div></div>
 
 <!-- info card -->
-<div id="infoCard" class="panel">
+<div id="infoCard" class="panel"><div class="grab"></div>
   <button class="x" id="infoX" title="close">&times;</button>
   <div class="where" id="infoWhere"></div>
   <div><span id="infoBig">--</span><span class="cls" id="infoCls"></span></div>
@@ -137,7 +191,7 @@ body.tour #infoCard{top:150px}
 
 <!-- layers -->
 <button class="btn" id="layersBtn" title="Layers"><svg width="26" height="22" viewBox="0 0 26 22"><path d="M13 2 L24 8 L13 14 L2 8 Z" fill="#ffe2b0"/><path d="M4 11.5 L13 16.5 L22 11.5 L24 12.6 L13 19 L2 12.6 Z" fill="#aab3c2"/></svg>Layers</button>
-<div id="layersPop" class="panel">
+<div id="layersPop" class="panel"><div class="grab"></div>
   <h3>At 1.1 m (where people walk)</h3>
   <div class="chips" id="chipsPed"></div>
   <div id="opRow">Opacity <input type="range" id="pedAlpha" min="0.1" max="1" step="0.05" value="0.85"></div>
@@ -191,6 +245,8 @@ body.tour #infoCard{top:150px}
 // ============================================================================ CONFIG (retune when the new runs arrive)
 // Short names for the scenario buttons and the comparison line, by scenario key.
 const SCEN_SHORT={nonveg:"No trees",bare:"No trees",veg:"Today's trees",itree:"Today's trees",paint:"+ Reflective roads",reflective:"+ Reflective roads"};
+const SCEN_PHONE={nonveg:"No trees",bare:"No trees",veg:"Trees",itree:"Trees",paint:"+ Paint",reflective:"+ Paint"};   // phone button labels
+const TOUR_SHORT=["Heat","Trees","Roads"];   // phone labels of the tour steps
 const SCEN_CMP={nonveg:"Without trees",bare:"Without trees",veg:"With trees",itree:"With trees",paint:"With reflective roads",reflective:"With reflective roads"};
 const ROLE={base:["nonveg","bare"],trees:["veg","itree"],paint:["paint","reflective"]};   // scenario roles used by the tour
 // Tour steps. place: "hottest" | "cooling" | "paintBest" | {x,y}; time: "peak" | local hour;
@@ -243,17 +299,17 @@ const PET_CLASSES=[[18,"Cool"],[23,"Comfortable"],[29,"Slightly warm"],[35,"Warm
 function petClass(v){for(const [e,n] of PET_CLASSES)if(v<e)return n;return "Very hot"}
 const HEAT=[[0,"#3b6fb6"],[.16,"#7fc6a4"],[.34,"#f6e27a"],[.53,"#f39c45"],[.72,"#d7301f"],[.9,"#7a0177"],[1,"#3f0040"]];
 const PED={
-  pet:{chip:"PET",name:"Felt temperature (PET) at 1.1 m",unit:"°C",src:0,ch:0,q:"pet",lo:18,hi:50,stops:HEAT,classes:true},
-  tair:{chip:"Air temperature",name:"Air temperature at 1.1 m",unit:"°C",src:0,ch:2,q:"tair",lo:22,hi:40,stops:HEAT},
-  tmrt:{chip:"Radiant heat (Tmrt)",name:"Radiant heat (Tmrt) at 1.1 m",unit:"°C",src:0,ch:1,q:"tmrt",lo:20,hi:70,stops:HEAT},
-  wind:{chip:"Wind",name:"Wind speed at 1.1 m",unit:"m/s",src:1,ch:0,q:"wind",lo:0,hi:4,stops:[[0,"#fbfdff"],[.5,"#6baed6"],[1,"#08306b"]]},
-  sun:{chip:"Sun and shade",name:"Sun and shade at 1.1 m",unit:"",src:1,ch:1,q:"sun",lo:0,hi:1,stops:[[0,"#34405a"],[.15,"#5a6b8a"],[1,"#ffe9a8"]]},
-  dpet:{chip:"PET change",name:"Felt-temperature change",unit:"°C",src:0,ch:0,q:"pet",lo:-10,hi:10,diff:true,stops:[[0,"#2166ac"],[.35,"#92c5de"],[.5,"#f4f4f4"],[.65,"#f4a582"],[1,"#b2182b"]]}
+  pet:{short:"PET at 1.1 m",chip:"PET",name:"Felt temperature (PET) at 1.1 m",unit:"°C",src:0,ch:0,q:"pet",lo:18,hi:50,stops:HEAT,classes:true},
+  tair:{short:"Air temp. 1.1 m",chip:"Air temperature",name:"Air temperature at 1.1 m",unit:"°C",src:0,ch:2,q:"tair",lo:22,hi:40,stops:HEAT},
+  tmrt:{short:"Tmrt 1.1 m",chip:"Radiant heat (Tmrt)",name:"Radiant heat (Tmrt) at 1.1 m",unit:"°C",src:0,ch:1,q:"tmrt",lo:20,hi:70,stops:HEAT},
+  wind:{short:"Wind 1.1 m",chip:"Wind",name:"Wind speed at 1.1 m",unit:"m/s",src:1,ch:0,q:"wind",lo:0,hi:4,stops:[[0,"#fbfdff"],[.5,"#6baed6"],[1,"#08306b"]]},
+  sun:{short:"Sun at 1.1 m",chip:"Sun and shade",name:"Sun and shade at 1.1 m",unit:"",src:1,ch:1,q:"sun",lo:0,hi:1,stops:[[0,"#34405a"],[.15,"#5a6b8a"],[1,"#ffe9a8"]]},
+  dpet:{short:"PET change",chip:"PET change",name:"Felt-temperature change",unit:"°C",src:0,ch:0,q:"pet",lo:-10,hi:10,diff:true,stops:[[0,"#2166ac"],[.35,"#92c5de"],[.5,"#f4f4f4"],[.65,"#f4a582"],[1,"#b2182b"]]}
 };
 const SURF={
   none:{chip:"Photo",name:"",off:true,ch:0,q:"tsurf",lo:0,hi:1,stops:[[0,"#000000"],[1,"#ffffff"]]},
-  tsurf:{chip:"Surface temperature",name:"Surface temperature (ground, walls, roofs)",unit:"°C",ch:0,q:"tsurf",lo:20,hi:60,stops:HEAT,wall:"wallT"},
-  solar:{chip:"Sunlight",name:"Sunlight on surfaces",unit:"W/m²",ch:1,q:"solar",lo:0,hi:900,stops:[[0,"#1b2033"],[.3,"#6a3d8f"],[.65,"#f08a3a"],[1,"#fff1b8"]],wall:"wallS"}
+  tsurf:{short:"Surface temp.",chip:"Surface temperature",name:"Surface temperature (ground, walls, roofs)",unit:"°C",ch:0,q:"tsurf",lo:20,hi:60,stops:HEAT,wall:"wallT"},
+  solar:{short:"Sunlight",chip:"Sunlight",name:"Sunlight on surfaces",unit:"W/m²",ch:1,q:"solar",lo:0,hi:900,stops:[[0,"#1b2033"],[.3,"#6a3d8f"],[.65,"#f08a3a"],[1,"#fff1b8"]],wall:"wallS"}
 };
 function hex(c){const n=parseInt(c.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255]}
 function buildLUT(stops){const out=new Uint8Array(256*4);for(let i=0;i<256;i++){const t=i/255;let k=0;while(k<stops.length-2&&t>stops[k+1][0])k++;
@@ -515,15 +571,37 @@ const HELP={map:"<b>Drag</b> to move the map &middot; <b>scroll</b> or <b>pinch<
   walk:"<b>Drag</b> to look around &middot; <b>scroll</b> or <b>pinch</b> to zoom &middot; <b>double-click</b> the street to walk there &middot; <b>&uarr;/&darr;</b> or <b>W/S</b> step forward or back &middot; <b>&larr;/&rarr;</b> turn &middot; <b>Shift</b> walk faster &middot; <b>Esc</b> or &ldquo;Back to map&rdquo; returns to the map. The small map at the bottom left shows where you are; click it to jump."};
 function setModeUI(){const w=S.mode==="walk";$("backMap").style.display=w?"inline-block":"none";$("walkpad").style.display=w&&S.ui==="explore"?"flex":"none";
   $("mini").style.display=w?"block":"none";$("helpT").textContent=w?"Street View controls":"Map controls";$("helpTxt").innerHTML=HELP[S.mode];layout();S.dirty=true}
-function layout(){const bh=$("bottom").offsetHeight,b=12+bh+10;
-  $("layersBtn").style.bottom=b+"px";$("layersPop").style.bottom=(b+72)+"px";$("navbox").style.bottom=b+"px";$("walkpad").style.bottom=b+"px";
-  $("mini").style.bottom=(b+72)+"px";$("help").style.bottom=b+"px";
-  // keep the info card clear of the nav cluster (bottom right)
-  const nbTop=innerHeight-b-$("navbox").offsetHeight,ic=$("infoCard"),top=parseFloat(getComputedStyle(ic).top)||58;ic.style.maxHeight=Math.max(160,nbTop-top-10)+"px"}
-if(window.ResizeObserver)new ResizeObserver(()=>layout()).observe(document.getElementById("bottom"));
-addEventListener("resize",layout);
+const PHONE_MQ=matchMedia("(max-width:700px), (pointer:coarse) and (max-height:520px)");
+const isPhone=()=>document.body.classList.contains("phone");
+function setDevice(){document.body.classList.toggle("phone",PHONE_MQ.matches);
+  document.body.classList.toggle("touch",matchMedia("(pointer:coarse)").matches||(navigator.maxTouchPoints>0&&!matchMedia("(any-pointer:fine)").matches))}   // touch-only devices: hide +/-
+setDevice();
+function layout(){const br=$("bottom").getBoundingClientRect(),b=innerHeight-br.top+8,ph=isPhone();
+  let up=b;   // bottom offset for the floating buttons
+  const lp=$("layersPop"),ic=$("infoCard"),sheet=ph?[lp,ic].find(e=>getComputedStyle(e).display!=="none"):null;
+  if(ph){for(const e of [lp,ic])e.style.bottom=(b-4)+"px";if(sheet)up=b-4+sheet.offsetHeight+6}
+  $("layersBtn").style.bottom=up+"px";$("layersPop").style.bottom=ph?(b-4)+"px":(b+72)+"px";$("navbox").style.bottom=up+"px";$("walkpad").style.bottom=b+"px";
+  $("mini").style.bottom=(up+(ph?60:72))+"px";$("mini").style.visibility=(ph&&sheet)?"hidden":"visible";$("help").style.bottom=up+"px";
+  const cb=$("card").getBoundingClientRect();
+  if(ph){$("tourBar").style.top=(cb.bottom+6)+"px";const mp=$("menuPop");mp.style.top=(cb.bottom+4)+"px";mp.style.right="6px";ic.style.maxHeight="";
+    // short screens (landscape): hide floating buttons that no longer fit between the top bar and a sheet
+    const room=innerHeight-up-cb.bottom-8;$("navbox").style.visibility=$("navbox").offsetHeight>room?"hidden":"visible";
+    $("layersBtn").style.visibility=$("layersBtn").offsetHeight>room?"hidden":"visible"}
+  else{$("navbox").style.visibility="visible";$("layersBtn").style.visibility="visible";$("tourBar").style.top="";
+    // keep the info card clear of the nav cluster (bottom right)
+    const nbTop=innerHeight-b-$("navbox").offsetHeight,top=parseFloat(getComputedStyle(ic).top)||58;ic.style.maxHeight=Math.max(160,nbTop-top-10)+"px"}
+  for(const b2 of $("scen").children)if(b2.dataset.key)b2.querySelector(".sh").textContent=SCEN_PHONE[b2.dataset.key]||b2.querySelector(".lg").textContent}
+if(window.ResizeObserver){const ro=new ResizeObserver(()=>layout());for(const id of ["bottom","card","infoCard","layersPop"])ro.observe(document.getElementById(id))}
+PHONE_MQ.addEventListener&&PHONE_MQ.addEventListener("change",()=>{setDevice();layout();S.dirty=true});
+addEventListener("resize",()=>{setDevice();layout()});
+function setLayers(open){S.layersOpen=open;$("layersPop").style.display=open?"block":"none";updateCard();layout()}
+// phones: drag a bottom sheet down by its top strip to close it
+function swipeClose(el,close){let y0=null,dy=0;
+  el.addEventListener("pointerdown",e=>{if(!isPhone())return;const r=el.getBoundingClientRect();if(e.clientY-r.top>30||e.target.closest("button,input,select,summary"))return;y0=e.clientY;dy=0;el.setPointerCapture(e.pointerId)});
+  el.addEventListener("pointermove",e=>{if(y0===null)return;dy=Math.max(0,e.clientY-y0);el.style.transform=`translateY(${dy}px)`});
+  const end=()=>{if(y0===null)return;el.style.transform="";y0=null;if(dy>60)close()};el.addEventListener("pointerup",end);el.addEventListener("pointercancel",end)}
 function buildUI(){
-  const sc=$("scen");sc.innerHTML="";S.man.scenarios.forEach((s,i)=>{const b=document.createElement("button");b.textContent=shortName(s);b.title=s.label;b.onclick=()=>{S.scen=i;refreshScen()};sc.appendChild(b)});
+  const sc=$("scen");sc.innerHTML="";S.man.scenarios.forEach((s,i)=>{const b=document.createElement("button");b.dataset.key=s.key;b.innerHTML=`<span class="lg">${shortName(s)}</span><span class="sh">${SCEN_PHONE[s.key]||shortName(s)}</span>`;b.title=s.label;b.onclick=()=>{S.scen=i;refreshScen()};sc.appendChild(b)});
   const gt=$("goto");for(const p of S.man.presets){const o=document.createElement("option");o.value="p"+S.man.presets.indexOf(p);o.textContent=p.name;gt.appendChild(o)}
   const ow=document.createElement("option");ow.value="whole";ow.textContent="Whole superblock";gt.appendChild(ow);
   gt.onchange=()=>{const v=gt.value;gt.value="";if(v==="whole"){flyTo({mode:"map",tx:(S.man.grid.x0+S.man.grid.x1)/2,ty:(S.man.grid.y0+S.man.grid.y1)/2,dist:1500,head:15,pitch:55});return}
@@ -535,10 +613,14 @@ function buildUI(){
   const cs=$("chipsSurf");for(const k of Object.keys(SURF)){const b=document.createElement("button");b.className="chip";b.dataset.surf=k;b.textContent=k==="solar"&&S.man.solarLabel?"Sunlight":SURF[k].chip;
     if(k==="solar"&&S.man.solarLabel)b.title=S.man.solarLabel;b.onclick=()=>{S.surf=k;uploadWalls();refreshLayers()};cs.appendChild(b)}
   $("pedAlpha").oninput=e=>{S.ped.alpha=+e.target.value;S.dirty=true};
-  $("layersBtn").onclick=e=>{e.stopPropagation();const p=$("layersPop");p.style.display=p.style.display==="block"?"none":"block"};
-  document.addEventListener("pointerdown",e=>{const p=$("layersPop");if(p.style.display==="block"&&!p.contains(e.target)&&!$("layersBtn").contains(e.target))p.style.display="none"},true);
+  $("layersBtn").onclick=e=>{e.stopPropagation();setLayers($("layersPop").style.display!=="block")};
+  document.addEventListener("pointerdown",e=>{const p=$("layersPop");if(p.style.display==="block"&&!p.contains(e.target)&&!$("layersBtn").contains(e.target))setLayers(false);
+    const mp=$("menuPop");if(mp.classList.contains("open")&&!mp.contains(e.target)&&e.target!==$("bMenu"))mp.classList.remove("open")},true);
+  $("bMenu").onclick=()=>$("menuPop").classList.toggle("open");
+  $("mHelp").onclick=()=>{$("menuPop").classList.remove("open");showHelp(true)};$("mAbout").onclick=()=>{$("menuPop").classList.remove("open");$("about").style.display="flex"};
+  swipeClose($("infoCard"),()=>$("infoX").click());swipeClose($("layersPop"),()=>setLayers(false));
   // tour
-  const tb=$("tourBtns");TOUR.forEach((st,i)=>{const b=document.createElement("button");b.className="btn";b.innerHTML=`<span class="n">${i+1}</span>${st.title}`;
+  const tb=$("tourBtns");TOUR.forEach((st,i)=>{const b=document.createElement("button");b.className="btn";b.innerHTML=`<span class="n">${i+1}</span><span class="lg">${st.title}</span><span class="sh">${st.short||TOUR_SHORT[i]||st.title}</span>`;
     const ok=!st.requires||roleIndex(st.requires)>=0;b.disabled=!ok;if(!ok)b.title=st.disabledTip||"";b.onclick=()=>runTour(i);tb.appendChild(b)});
   for(const b of $("modeSeg").children)b.onclick=()=>setUI(b.dataset.mode);
   $("time").max=S.man.times.length-1;$("time").oninput=e=>{S.tf=+e.target.value;onTime()};
@@ -559,7 +641,7 @@ function buildUI(){
 function showHelp(on){$("help").style.display=on?"block":"none";if(!on)store.set("expoHelpSeen","1")}
 function setUI(mode){S.ui=mode;document.body.classList.toggle("tour",mode==="tour");for(const b of $("modeSeg").children)b.classList.toggle("on",b.dataset.mode===mode);
   const t=mode==="tour";$("tourBar").style.display=t?"flex":"none";$("layersBtn").style.display=t?"none":"flex";$("gotoRow").style.display=t?"none":"flex";
-  layout();if(t)$("layersPop").style.display="none";if(!t){S.tourStep=-1;$("caption").style.display="none";[...$("tourBtns").children].forEach(b=>b.classList.remove("on"));if(S.ref!==0){S.ref=0;if(S.man)updateFrames()}}
+  layout();if(t&&S.layersOpen)setLayers(false);if(!t){S.tourStep=-1;$("caption").style.display="none";[...$("tourBtns").children].forEach(b=>b.classList.remove("on"));if(S.ref!==0){S.ref=0;if(S.man)updateFrames()}}
   setModeUI()}
 function zoomBtn(f){if(S.mode==="map"){const r=cv.getBoundingClientRect();zoomMapAt(r.left+r.width/2,r.top+r.height/2,f)}else{S.fov=clamp(S.fov*f,25,100);S.dirty=true}}
 function refreshScen(){[...$("scen").children].forEach((b,i)=>b.classList.toggle("on",i===S.scen));return updateFrames()}
@@ -578,7 +660,7 @@ let playAcc=0;function togglePlay(){S.play=!S.play;$("play").innerHTML=S.play?"&
 function activeLayer(){if(S.ped.on)return {L:PED[S.ped.layer],kind:"ped"};if(!SURF[S.surf].off)return {L:SURF[S.surf],kind:"surf"};return null}
 function drawLegend(){const a=activeLayer(),lg=$("legend");if(!a){lg.style.display="none";return}lg.style.display="flex";const L=a.L,lut=buildLUT(L.stops);
   const name=L.diff?`PET change vs. ${shortName(S.man.scenarios[S.ref]).replace(/^\+ /,"").toLowerCase()}`:(L===SURF.solar&&S.man.solarLabel?S.man.solarLabel:L.name);
-  $("legT").textContent=name+(L.unit?` (${L.unit})`:"");
+  $("legT").textContent=(isPhone()&&L.short?(L.diff?L.short+" vs. "+shortName(S.man.scenarios[S.ref]).replace(/^\+ /,"").toLowerCase():L.short):name)+(L.unit?` (${L.unit})`:"");
   const c=$("legcv"),x=c.getContext("2d");for(let i=0;i<c.width;i++){const k=Math.round(i/(c.width-1)*255)*4;x.fillStyle=`rgb(${lut[k]},${lut[k+1]},${lut[k+2]})`;x.fillRect(i,0,1,c.height)}
   const tk=$("legTicks");tk.innerHTML="";const ticks=L.classes?[18,23,29,35,41,50]:(L.q==="sun"?[0,1]:[0,.25,.5,.75,1].map(f=>lerp(L.lo,L.hi,f)));
   for(const v of ticks){const sp=document.createElement("span");sp.style.left=clamp((v-L.lo)/(L.hi-L.lo),0,1)*100+"%";if(v===L.lo)sp.style.transform="none";if(v===L.hi)sp.style.transform="translateX(-100%)";
@@ -596,7 +678,8 @@ function petOf(sk,k){const a=cache.get(sk+"|A|"+cur.i0),b=cache.get(sk+"|A|"+cur
 function classColor(v){const L=PED.pet,t=clamp((v-L.lo)/(L.hi-L.lo),0,1),k=Math.round(t*255)*4,l=buildLUT(L.stops);return `rgb(${l[k]},${l[k+1]},${l[k+2]})`}
 function diffText(dd){return Math.abs(dd)<0.05?"the same":`${Math.abs(dd).toFixed(1)} °C ${dd>0?"hotter":"cooler"}`}
 function updateCard(){if(!S.man)return;const card=$("infoCard"),p=cardPoint();
-  const show=S.cardOpen&&p;card.style.display=show?"block":"none";if(!show)return;
+  const show=S.cardOpen&&p&&!(isPhone()&&S.layersOpen);const was=card.style.display==="block";card.style.display=show?"block":"none";
+  if(show!==was){if(show&&isPhone())$("infoMore").open=false;requestAnimationFrame(layout)}if(!show)return;
   const [x,y]=p,s=sampleAt(x,y),sk=S.man.scenarios[S.scen];
   $("infoWhere").textContent=(S.mode==="walk"?"Where you stand":"At this point")+` · ${shortName(sk).replace(/^\+ /,"")} · ${fmtClock(timeHour())}`;
   if(!s||!isOutdoor(x,y)){$("infoBig").textContent="–";$("infoCls").style.display="none";$("infoSub").textContent=s?"This point is on a building.":"Outside the simulated area.";$("infoCmp").innerHTML="";$("infoTab").innerHTML="";drawChart();return}
@@ -669,22 +752,34 @@ async function runTour(i){const st=TOUR[i];if(st.requires&&roleIndex(st.requires
 const ptrs=new Map();let drag=null,pinch=null;
 function isRotateDrag(e){return e.button===2||e.ctrlKey||e.metaKey||(e.button===0&&e.altKey)}
 cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});fly=null;
-  if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),mx:(a.x+b.x)/2,my:(a.y+b.y)/2};drag=null;return}
+  if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),mx:(a.x+b.x)/2,my:(a.y+b.y)/2,ang:Math.atan2(b.y-a.y,b.x-a.x)};pinched=true;drag=null;return}
   drag={x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,t:performance.now(),rot:S.mode==="map"&&isRotateDrag(e),btn:e.button,moved:false};if(!S.pick)cv.classList.add("drag")});
 cv.addEventListener("pointermove",e=>{if(!ptrs.has(e.pointerId))return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  if(pinch&&ptrs.size===2){const [a,b]=[...ptrs.values()],d=Math.hypot(a.x-b.x,a.y-b.y),mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
-    if(S.mode==="map"){panMap(pinch.mx,pinch.my,mx,my);zoomMapAt(mx,my,pinch.d/Math.max(d,1))}else{S.fov=clamp(S.fov*pinch.d/Math.max(d,1),25,100);S.dirty=true}
-    pinch={d,mx,my};return}
+  if(pinch&&ptrs.size===2){S.dirty=true;return}   // two fingers: evaluated once per frame in pinchStep()
   if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.hypot(e.clientX-drag.x0,e.clientY-drag.y0)>4)drag.moved=true;
   if(S.mode==="walk"){const k=S.fov/cv.clientHeight;S.head=wrap360(S.head+dx*k);S.pitch=clamp(S.pitch-dy*k,-70,75)}
   else if(drag.rot){S.map.head=wrap360(S.map.head-dx*0.3);S.map.pitch=clamp(S.map.pitch+dy*0.25,20,89)}
   else panMap(drag.x,drag.y,e.clientX,e.clientY);
   drag.x=e.clientX;drag.y=e.clientY;S.dirty=true});
-let lastClick=0;
-function endPtr(e){ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;cv.classList.remove("drag");
+// two-finger gesture, evaluated once per animation frame so both fingers have moved:
+// pinch = zoom at the pinch centre, twist = rotate, both fingers moving up/down together = tilt (map); pinch = field of view (Street View)
+function pinchStep(){if(!pinch||ptrs.size!==2)return;const [a,b]=[...ptrs.values()],d=Math.hypot(a.x-b.x,a.y-b.y),mx=(a.x+b.x)/2,my=(a.y+b.y)/2,ang=Math.atan2(b.y-a.y,b.x-a.x);
+  if(d===pinch.d&&mx===pinch.mx&&my===pinch.my)return;
+  if(S.mode==="map"){const dz=Math.log(Math.max(d,1)/Math.max(pinch.d,1));let da=ang-pinch.ang;if(da>Math.PI)da-=2*Math.PI;if(da<-Math.PI)da+=2*Math.PI;const dyM=my-pinch.my,dxM=mx-pinch.mx;
+    if(Math.abs(dyM)>1&&Math.abs(dyM)>2*Math.abs(dxM)&&Math.abs(da)<0.03&&Math.abs(dz)*d<Math.abs(dyM)*0.5){S.map.pitch=clamp(S.map.pitch+dyM*0.3,20,89);clampMap()}
+    else{panMap(pinch.mx,pinch.my,mx,my);zoomMapAt(mx,my,pinch.d/Math.max(d,1));S.map.head=wrap360(S.map.head-da*180/Math.PI);clampMap()}}
+  else S.fov=clamp(S.fov*pinch.d/Math.max(d,1),25,100);
+  pinch={d,mx,my,ang};S.dirty=true}
+let lastClick=0,lastTap={t:0,x:0,y:0},lastTouchEnd=0,pinched=false;
+function endPtr(e){if(pinch&&ptrs.size===2)pinchStep();ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;cv.classList.remove("drag");
+  if(e.pointerType==="touch"){lastTouchEnd=performance.now();const wasPinch=pinched;if(ptrs.size===0)pinched=false;
+    if(wasPinch){drag=null;return}
+    if(drag&&!drag.moved&&performance.now()-drag.t<500&&!S.pick){const now=performance.now();
+      if(now-lastTap.t<320&&Math.hypot(e.clientX-lastTap.x,e.clientY-lastTap.y)<40){lastTap.t=0;doubleTap(e.clientX,e.clientY);drag=null;return}   // double-tap
+      lastTap={t:now,x:e.clientX,y:e.clientY}}}
   if(drag&&!drag.moved&&performance.now()-drag.t<500&&drag.btn===0){const p=groundAt(e.clientX,e.clientY);
     if(S.pick){if(p)enterStreet(p[0],p[1])}
-    else if(S.mode==="map"&&p){const now=performance.now();if(now-lastClick>350){S.probe=p;S.cardOpen=true;updateCard();S.dirty=true}lastClick=now}}
+    else if(S.mode==="map"&&p){const now=performance.now();if(now-lastClick>350){if(isPhone()&&S.layersOpen)setLayers(false);S.probe=p;S.cardOpen=true;updateCard();S.dirty=true}lastClick=now}}
   drag=null}
 cv.addEventListener("pointerup",endPtr);cv.addEventListener("pointercancel",endPtr);
 cv.addEventListener("contextmenu",e=>e.preventDefault());
@@ -696,7 +791,8 @@ cv.addEventListener("wheel",e=>{e.preventDefault();fly=null;
   else if(mouseWheel)zoomMapAt(e.clientX,e.clientY,Math.exp(dy*0.0015));
   else panMap(e.clientX,e.clientY,e.clientX-dx,e.clientY-dy);
 },{passive:false});
-cv.addEventListener("dblclick",e=>{const p=groundAt(e.clientX,e.clientY);if(!p)return;
+function doubleTap(x,y){const p=groundAt(x,y);if(!p)return;if(S.mode==="map")tween={k:"zoom",x,y,t:0};else if(Math.hypot(p[0]-S.pos[0],p[1]-S.pos[1])<500)goTo(p[0],p[1],S.head)}
+cv.addEventListener("dblclick",e=>{if(performance.now()-lastTouchEnd<700)return;const p=groundAt(e.clientX,e.clientY);if(!p)return;
   if(S.mode==="map"){tween={k:"zoom",x:e.clientX,y:e.clientY,t:0}}
   else{if(Math.hypot(p[0]-S.pos[0],p[1]-S.pos[1])<500)goTo(p[0],p[1],S.head)}});
 function setupPeg(){const peg=$("peg"),ghost=$("pegGhost");let pd=null;
@@ -709,7 +805,7 @@ function setupPeg(){const peg=$("peg"),ghost=$("pegGhost");let pd=null;
 addEventListener("keydown",e=>{if(e.target.tagName==="SELECT")return;S.keys[e.code]=true;
   if(e.code==="Space"){e.preventDefault();togglePlay()}
   if(e.code==="KeyT"){S.scen=(S.scen+1)%S.man.scenarios.length;refreshScen()}
-  if(e.code==="Escape"){if($("layersPop").style.display==="block")$("layersPop").style.display="none";else if(S.pick)setPick(false);else if($("help").style.display==="block")showHelp(false);
+  if(e.code==="Escape"){if($("layersPop").style.display==="block")setLayers(false);else if(S.pick)setPick(false);else if($("help").style.display==="block")showHelp(false);
     else if($("about").style.display==="flex")$("about").style.display="none";else toMap()}
   if(S.mode==="map"&&(e.key==="+"||e.key==="="))zoomBtn(0.7);if(S.mode==="map"&&(e.key==="-"||e.key==="_"))zoomBtn(1/0.7);
   if(e.code.startsWith("Arrow"))e.preventDefault()});
@@ -720,7 +816,7 @@ function resize(){const dpr=Math.min(devicePixelRatio||1,1.5),w=Math.round(inner
 function skyCols(el){const day=smooth(-6,12,el),dusk=Math.exp(-Math.pow((el-2)/7,2));
   const zen=[lerp(.02,.27,day),lerp(.03,.50,day),lerp(.08,.85,day)],hor=[lerp(.10,.74,day)+.25*dusk,lerp(.12,.84,day)+.05*dusk,lerp(.20,.95,day)-.15*dusk];return {zen,hor:hor.map(v=>clamp(v,0,1)),day}}
 let lastT=performance.now(),cardAcc=0;
-function step(now){const dt=Math.min((now-lastT)/1000,0.1);lastT=now;resize();const k=S.keys;
+function step(now){const dt=Math.min((now-lastT)/1000,0.1);lastT=now;resize();const k=S.keys;pinchStep();
   if(fly){fly.t=Math.min(1,fly.t+dt/fly.dur);const e=smooth(0,1,fly.t),f=fly.from,t=fly.to,m=S.map;
     m.tx=lerp(f.tx,t.tx,e);m.ty=lerp(f.ty,t.ty,e);m.dist=Math.exp(lerp(Math.log(f.dist),Math.log(t.dist),e))+fly.lift*Math.sin(Math.PI*e);
     m.head=angLerp(f.head,t.head,e);m.pitch=lerp(f.pitch,t.pitch,e);clampMap();S.dirty=true;if(fly.t>=1){const d=fly.done;fly=null;d()}}
@@ -778,7 +874,11 @@ function render(){const c=camera(),sun=sunNow(),sk=skyCols(sun.elev),g=S.man.gri
     if(typeof DecompressionStream==="undefined")throw new Error("This browser is too old (no DecompressionStream). Use a current Chrome, Edge or Firefox.");
     if(!window.EXPO||!EXPO.manifest)throw new Error("data/manifest.js is missing. Run scripts/build_viz_data.py first.");
     S.man=EXPO.manifest;
-    const files=["data/geometry.js","data/ortho.js",...S.man.scenarios.map(s=>`data/frames_${s.key}.js`)];
+    // phones load data_lite/ (hourly steps, about half the size) when it exists; ?full forces the full data, ?lite forces the light data
+    const qs=location.search,wantLite=!window.EXPO_INLINE&&!/[?&]full\b/.test(qs)&&(isPhone()||/[?&]lite\b/.test(qs));let dir="data/";
+    if(wantLite){try{const full=EXPO.manifest;await loadScript("data_lite/manifest.js");if(EXPO.manifest&&EXPO.manifest!==full&&EXPO.manifest.lite){dir="data_lite/";S.man=EXPO.manifest}}catch(e){}}
+    S.dataDir=dir;
+    const files=["data/geometry.js","data/ortho.js",...S.man.scenarios.map(s=>`${dir}frames_${s.key}.js`)];
     let n=0;if(!window.EXPO_INLINE)for(const f of files){try{await loadScript(f)}catch(e){if(!f.includes("ortho"))throw e}n++;$("lbar").style.width=(n/files.length*80)+"%"}
     if(!EXPO.frames[S.man.scenarios[0].key].imgC)throw new Error("The data files are from an older converter version. Re-run scripts/build_viz_data.py.");
     lutP=tex(256,1,buildLUT(HEAT));lutS=tex(256,1,buildLUT(HEAT));
