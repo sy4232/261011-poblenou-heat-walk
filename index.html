@@ -40,7 +40,7 @@ select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);bo
 #infoMore table{width:100%;border-collapse:collapse;margin:6px 0;font-variant-numeric:tabular-nums;font-size:13px}
 #infoMore td{padding:2px 0;border-bottom:1px solid var(--line)} #infoMore td:last-child{text-align:right}
 #chart{width:100%;height:140px;display:block;margin-top:6px} #chartnote{font-size:11px;color:var(--mute)}
-#pin{position:fixed;width:16px;height:16px;margin:-16px 0 0 -8px;pointer-events:none;display:none;z-index:3}
+#pin{position:fixed;width:34px;height:34px;margin:-34px 0 0 -17px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6));pointer-events:none;display:none;z-index:3}
 /* bottom: legend + time bar */
 #bottom{left:12px;right:12px;bottom:12px;padding:8px 12px;display:flex;flex-direction:column;gap:6px}
 #legend{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--mute)}
@@ -51,6 +51,9 @@ select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);bo
 #legTicks span{position:absolute;transform:translateX(-50%)}
 #legCls{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:330px}
 #legSrc{font-size:10.5px;flex:1;min-width:120px;text-align:right}
+#legend2{display:none;align-items:center;gap:10px;font-size:10.5px;color:var(--mute);margin-top:2px}
+#leg2T{white-space:nowrap} #leg2BarWrap{width:260px;max-width:45vw} #leg2cv{width:100%;height:7px;border-radius:3px;display:block}
+#leg2Ticks{position:relative;height:12px;font-size:10px} #leg2Ticks span{position:absolute;transform:translateX(-50%)}
 #timebar{display:flex;align-items:center;gap:14px}
 #clock{font-size:24px;font-weight:650;min-width:78px;font-variant-numeric:tabular-nums;line-height:1.05}
 #clock small{display:block;font-size:10.5px;color:var(--mute);font-weight:400}
@@ -104,6 +107,30 @@ body.tour #infoCard{top:150px}
 #err{color:#ff9b8f;max-width:520px;text-align:center}
 @media (max-width:900px){#legSrc,#legCls{display:none}#caption{max-width:calc(100vw - 40px)}}
 button,select,.chip{touch-action:manipulation}
+#layersBtn,#layersPop,#zIn,#zOut{display:none!important}
+#windcv{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#card{width:328px;max-width:calc(100% - 24px)}
+#gotoRow{display:none!important}
+/* variable picker: PET with the four things it is made of, surface temperature apart */
+#vars{border-top:1px solid var(--line);padding-top:8px}
+#chipsPed{display:flex;flex-direction:column;gap:6px;margin:0}
+#chipsPed .chip{display:flex;align-items:center;gap:7px;border-radius:10px;padding:6px 9px;text-align:left}
+#chipsPed svg{width:20px;height:20px;flex:0 0 auto}
+#chipsPed small{color:var(--mute);font-size:11px;font-weight:400;margin-left:auto}
+#chipsPed .chip.on small{color:#5a4a20}
+.vtop{display:flex;gap:6px} .vtop .vbig{flex:1;font-size:14px;font-weight:600;padding:8px 10px}
+.vdelta{font-size:12px!important;padding:6px 8px!important}
+.vsub{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-left:14px}
+.vsub .chip{flex-direction:column;gap:2px!important;padding:5px 2px!important;font-size:11px;justify-content:center;text-align:center!important}
+.vlab{font-size:10.5px;color:var(--mute);margin:-2px 0 -2px 28px}
+.vsep{height:1px;background:var(--line);margin:3px 0}
+.vsurf{border-style:dashed!important}
+/* the point card sits under the left card on desktop and stays open */
+body:not(.phone) #infoCard{left:12px;right:auto;width:328px;max-width:calc(100% - 24px)}
+body:not(.phone) #infoCard .x{display:none}
+#infoMore{margin-top:6px} #chart{width:100%;height:auto;display:block}
+#chartnote{font-size:11.5px;color:var(--mute);margin:2px 0 4px}
+body.tour #chipsPed{display:none}
 .sh,.grab,#bMenu,#menuPop{display:none}
 /* ---------------- phone layout (body.phone: width <= 700 px, or a touch screen <= 520 px high) ---------------- */
 body.phone{font-size:13px}
@@ -115,6 +142,14 @@ body.phone #card h1>span:first-child{display:none;font-size:13px;white-space:now
 body.phone #card .row{flex-wrap:nowrap;order:1}
 body.phone #modeSeg{order:2;margin-left:auto} body.phone #modeSeg button.on{display:none}
 body.phone #gotoRow{order:3} body.phone #bMenu{order:4}
+body.phone #card{flex-wrap:wrap}
+body.phone #card{width:auto}
+body.phone #vars{order:5;flex-basis:100%;border-top:0;padding-top:0}
+body.phone #chipsPed{flex-direction:row;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none}
+body.phone #chipsPed::-webkit-scrollbar{display:none}
+body.phone #chipsPed small,body.phone .vlab,body.phone .vsub .chip span,body.phone .vsurf span{display:none}
+body.phone .vtop .vbig{flex:0 0 auto;font-size:13px;padding:6px 9px} body.phone .vsub{display:flex;margin-left:2px;padding-left:6px}
+body.phone .vsep{width:1px;height:28px;margin:0 2px} body.phone #chipsPed .chip{min-height:38px;flex:0 0 auto}
 body.phone .seg button{min-height:40px;padding:6px 9px;font-size:13px}
 body.phone #goto{width:44px;height:44px;padding:0;color:transparent;-webkit-appearance:none;appearance:none;cursor:pointer;
   background:var(--panel2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z' fill='%23ffe2b0'/%3E%3C/svg%3E") center/22px no-repeat}
@@ -142,7 +177,7 @@ body.phone #infoCard,body.phone #layersPop{left:0;right:0;top:auto;width:auto;ma
   border-radius:16px 16px 0 0;padding:20px 14px 12px;padding-left:calc(env(safe-area-inset-left) + 14px);padding-right:calc(env(safe-area-inset-right) + 14px);z-index:6}
 body.phone .grab{display:block;position:absolute;top:7px;left:50%;width:44px;height:5px;margin-left:-22px;border-radius:3px;background:#5a6272}
 body.phone #infoCard .x{width:44px;height:44px;top:0;right:0}
-body.phone #infoBig{font-size:28px} body.phone .chip{min-height:40px;padding:8px 12px}
+body.phone #chart{height:96px} body.phone #infoBig{font-size:28px} body.phone .chip{min-height:40px;padding:8px 12px}
 body.phone #opRow input{height:36px}
 body.phone #help{width:calc(100% - 12px);font-size:13px}
 /* tour on phones */
@@ -158,13 +193,14 @@ body.phone.tour #infoCmp{font-size:13.5px} body.phone.tour #clock{font-size:17px
 </style>
 </head>
 <body>
-<canvas id="gl"></canvas>
+<canvas id="gl"></canvas><canvas id="windcv"></canvas>
 <div id="loading"><div>Loading the Poblenou model&hellip;</div><div class="bar"><i id="lbar"></i></div><div id="err"></div></div>
 
 <!-- top-left card -->
 <div id="card" class="panel">
   <h1><span>Poblenou heat walk <small style="font-size:11px;font-weight:500;padding:2px 6px;border-radius:6px;background:#4a3a12;color:#ffd98a;vertical-align:2px">Prototype</small></span><span class="seg" id="modeSeg"><button data-mode="tour">Tour</button><button data-mode="explore" class="on">Explore</button></span></h1>
   <div class="row"><span class="seg" id="scen"></span></div>
+  <div id="vars"><div id="chipsPed"></div></div>
   <div class="row" id="gotoRow"><select id="goto" title="Go to a place" aria-label="Go to a place"><option value="">Go to&hellip;</option></select></div>
   <button class="btn" id="bMenu" title="Help and About" aria-label="Menu">&#9776;</button>
 </div>
@@ -181,22 +217,18 @@ body.phone.tour #infoCmp{font-size:13.5px} body.phone.tour #clock{font-size:17px
   <div><span id="infoBig">--</span><span class="cls" id="infoCls"></span></div>
   <div id="infoSub"></div>
   <div id="infoCmp"></div>
-  <details id="infoMore"><summary>Details and day curve</summary>
-    <table id="infoTab"></table>
-    <canvas id="chart" width="272" height="140"></canvas>
+  <div id="infoMore">
+    <canvas id="chart" width="300" height="150"></canvas>
     <div id="chartnote"></div>
-  </details>
+    <table id="infoTab"></table>
+  </div>
 </div>
 <svg id="pin" viewBox="0 0 16 16"><path d="M8 16 L2 6 A6 6 0 1 1 14 6 Z" fill="#ffcf6b" stroke="#000"/><circle cx="8" cy="6" r="2.2" fill="#000"/></svg>
 
 <!-- layers -->
 <button class="btn" id="layersBtn" title="Layers"><svg width="26" height="22" viewBox="0 0 26 22"><path d="M13 2 L24 8 L13 14 L2 8 Z" fill="#ffe2b0"/><path d="M4 11.5 L13 16.5 L22 11.5 L24 12.6 L13 19 L2 12.6 Z" fill="#aab3c2"/></svg>Layers</button>
 <div id="layersPop" class="panel"><div class="grab"></div>
-  <h3>At 1.1 m (where people walk)</h3>
-  <div class="chips" id="chipsPed"></div>
-  <div id="opRow">Opacity <input type="range" id="pedAlpha" min="0.1" max="1" step="0.05" value="0.85"></div>
-  <h3>Surfaces (ground, walls, roofs)</h3>
-  <div class="chips" id="chipsSurf"></div>
+  <div id="opRow"><input type="range" id="pedAlpha" min="0.1" max="1" step="0.05" value="0.85"></div>
 </div>
 <div id="mini" class="panel"><canvas id="minicv" width="200" height="186"></canvas></div>
 
@@ -228,12 +260,12 @@ body.phone.tour #infoCmp{font-size:13.5px} body.phone.tour #clock{font-size:17px
   <h3>What you are looking at</h3>
   <p>A computer simulation of one clear, hot summer day (30 July) in the Poblenou superblock in Barcelona.</p>
   <ul>
-    <li><b>At 1.1 m</b>: a see-through sheet at the height of a person's body, showing how hot the street <b>feels</b> as a felt temperature (PET, &deg;C). PET combines air temperature, sun and shade, heat radiated by surfaces, humidity and wind. Comfortable 18&ndash;23 &deg;C, slightly warm 23&ndash;29, warm 29&ndash;35, hot 35&ndash;41, very hot above 41.</li>
-    <li><b>Surfaces</b>: the temperature of the pavement, walls and roofs, or the sunlight they receive, from the simulation.</li>
+    <li><b>At 1.1 m</b>: a see-through sheet at the height of a person's body, showing how hot the street <b>feels</b> as a feels-like temperature (PET, &deg;C). PET combines air temperature, sun and shade, heat radiated by surfaces, humidity and wind. Comfortable 18&ndash;23 &deg;C, slightly warm 23&ndash;29, warm 29&ndash;35, hot 35&ndash;41, very hot above 41.</li>
+    <li><b>Surface temperature</b>: the temperature of the pavement, walls and roofs from the simulation. <b>Wind</b> shows the wind speed at 1.1 m, with moving streaks for its direction.</li>
     <li><b>Scenarios</b> at the top left compare the street with and without trees. <b>Tour</b> walks through the main results in three steps.</li>
     <li>Click any point on the map to see its numbers. Open <b>Help</b> for the controls.</li>
   </ul>
-  <p style="font-size:12.5px">Prototype for discussion. It shows an earlier simulation of 30 July 2026 in the Poblenou superblock (Yamada et al. 2026, Street Art &amp; Urban Creativity 12(5), <a href="https://doi.org/10.66838/sauc.6427" target="_blank" rel="noopener" style="color:#9cc7ff">doi:10.66838/sauc.6427</a>). Known limits: tree shade enters only the 1.1 m felt temperature, not the surface temperatures; roofs receive no sunlight in these exports; the simulation runs about 3&ndash;4 &deg;C warm at noon compared with street measurements. New simulations will replace these results.</p>
+  <p style="font-size:12.5px">Prototype for discussion. It shows a new simulation of 30 July 2026 in the Poblenou superblock with the existing street trees (2026-10 run, after two days of spin-up; the earlier version is published in Yamada et al. 2026, Street Art &amp; Urban Creativity 12(5), <a href="https://doi.org/10.66838/sauc.6427" target="_blank" rel="noopener" style="color:#9cc7ff">doi:10.66838/sauc.6427</a>). Known limits: the street air runs about 4 &deg;C warm at midday compared with street measurements, so the feels-like temperature is likely too high; the open edge of the model area is not shown; the scenarios without trees and with reflective roads are still being computed.</p>
   <p style="color:var(--mute);font-size:12px">Data sources: aerial photo &copy; Institut Cartogr&agrave;fic i Geol&ograve;gic de Catalunya (ICGC), ortofoto 25 cm 2025; street trees: Ajuntament de Barcelona, Open Data BCN (Arbrat viari, Arbrat zona); building footprints: Direcci&oacute;n General del Catastro; weather forcing: Servei Meteorol&ograve;gic de Catalunya (Meteocat). Simulation and viewer: NYU, UPC and Hochschule Mainz.</p>
   <p style="color:var(--mute);font-size:12.5px" id="tech"></p>
   <button class="btn" id="aboutClose">Close</button>
@@ -244,23 +276,23 @@ body.phone.tour #infoCmp{font-size:13.5px} body.phone.tour #clock{font-size:17px
 "use strict";
 // ============================================================================ CONFIG (retune when the new runs arrive)
 // Short names for the scenario buttons and the comparison line, by scenario key.
-const SCEN_SHORT={nonveg:"No trees",bare:"No trees",veg:"Today's trees",itree:"Today's trees",paint:"+ Reflective roads",reflective:"+ Reflective roads"};
+const SCEN_SHORT={nonveg:"No trees",bare:"No trees",veg:"Existing trees",itree:"Existing trees",paint:"+ Reflective roads",reflective:"+ Reflective roads"};
 const SCEN_PHONE={nonveg:"No trees",bare:"No trees",veg:"Trees",itree:"Trees",paint:"+ Paint",reflective:"+ Paint"};   // phone button labels
 const TOUR_SHORT=["Heat","Trees","Roads"];   // phone labels of the tour steps
-const SCEN_CMP={nonveg:"Without trees",bare:"Without trees",veg:"With trees",itree:"With trees",paint:"With reflective roads",reflective:"With reflective roads"};
+const SCEN_CMP={nonveg:"Without trees",bare:"Without trees",veg:"With existing trees",itree:"With existing trees",paint:"With reflective roads",reflective:"With reflective roads"};
 const ROLE={base:["nonveg","bare"],trees:["veg","itree"],paint:["paint","reflective"]};   // scenario roles used by the tour
 // Tour steps. place: "hottest" | "cooling" | "paintBest" | {x,y}; time: "peak" | local hour;
 // scenario/ref: a role from ROLE; layer: 1.1 m layer key; view: "street" | "oblique".
 // Step 1 and 2 use the same spot ("cooling", the street where trees cool most at the peak) so that
 // step 2 shows the trees' effect where it matters; set place:"hottest" to start at the hottest street.
 const TOUR=[
-  {title:"Today's heat",place:"cooling",time:"peak",scenario:"base",layer:"pet",surf:"none",view:"street",pitch:-8,
+  {title:"Peak heat",place:"cooling",time:"peak",scenario:"base",layer:"pet",surf:"none",view:"street",pitch:-8,
    caption:v=>`${v.clock} on a clear July day: without trees this street feels like ${v.pet} °C (${v.cls.toLowerCase()}). ${v.frac35}% of the superblock's streets are above 35 °C.`},
   {title:"What street trees do",place:"cooling",time:"peak",scenario:"trees",ref:"base",layer:"dpet",surf:"none",view:"street",pitch:-8,
    caption:v=>`With today's trees the same street feels like ${v.pet} °C, ${v.dAbs} °C ${v.dWord} than without them. Blue on the ground shows where trees cool.`},
   {title:"Reflective roads",place:"paintBest",time:13,scenario:"paint",ref:"trees",layer:"dpet",surf:"none",view:"oblique",requires:"paint",
    disabledTip:"Coming with the new simulations",
-   caption:v=>`${v.clock}: reflective road paint changes the felt temperature here by ${v.dSigned} °C compared with today's trees.`}
+   caption:v=>`${v.clock}: reflective road paint changes the feels-like temperature here by ${v.dSigned} °C compared with today's trees.`}
 ];
 
 // ============================================================================ math
@@ -297,14 +329,15 @@ const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},se
 // ============================================================================ layers & palettes
 const PET_CLASSES=[[18,"Cool"],[23,"Comfortable"],[29,"Slightly warm"],[35,"Warm"],[41,"Hot"],[99,"Very hot"]];
 function petClass(v){for(const [e,n] of PET_CLASSES)if(v<e)return n;return "Very hot"}
-const HEAT=[[0,"#3b6fb6"],[.16,"#7fc6a4"],[.34,"#f6e27a"],[.53,"#f39c45"],[.72,"#d7301f"],[.9,"#7a0177"],[1,"#3f0040"]];
+const HEAT=[[0,"#3b6fb6"],[.18,"#7fc6a4"],[.38,"#f6e27a"],[.6,"#f39c45"],[.82,"#d7301f"],[1,"#8f0a0a"]];
 const PED={
-  pet:{short:"PET at 1.1 m",chip:"PET",name:"Felt temperature (PET) at 1.1 m",unit:"°C",src:0,ch:0,q:"pet",lo:18,hi:50,stops:HEAT,classes:true},
+  pet:{short:"PET at 1.1 m",chip:"PET",name:"Feels-like temperature (PET) at 1.1 m",unit:"°C",src:0,ch:0,q:"pet",lo:18,hi:50,stops:HEAT,classes:true},
   tair:{short:"Air temp. 1.1 m",chip:"Air temperature",name:"Air temperature at 1.1 m",unit:"°C",src:0,ch:2,q:"tair",lo:22,hi:40,stops:HEAT},
   tmrt:{short:"Tmrt 1.1 m",chip:"Radiant heat (Tmrt)",name:"Radiant heat (Tmrt) at 1.1 m",unit:"°C",src:0,ch:1,q:"tmrt",lo:20,hi:70,stops:HEAT},
-  wind:{short:"Wind 1.1 m",chip:"Wind",name:"Wind speed at 1.1 m",unit:"m/s",src:1,ch:0,q:"wind",lo:0,hi:4,stops:[[0,"#fbfdff"],[.5,"#6baed6"],[1,"#08306b"]]},
+  wind:{short:"Wind 1.1 m",chip:"Wind",name:"Wind speed at 1.1 m",unit:"m/s",src:1,ch:0,q:"wind",lo:0,hi:4,stops:[[0,"#1f2a44"],[.35,"#2c6fa8"],[.7,"#3fb0c0"],[1,"#c9eec0"]]},
+  rh:{short:"RH 1.1 m",chip:"Humidity",name:"Relative humidity at 1.1 m",unit:"%",src:1,ch:2,q:"rh",lo:30,hi:90,stops:[[0,"#fff5e0"],[.5,"#7fcdbb"],[1,"#225ea8"]]},
   sun:{short:"Sun at 1.1 m",chip:"Sun and shade",name:"Sun and shade at 1.1 m",unit:"",src:1,ch:1,q:"sun",lo:0,hi:1,stops:[[0,"#34405a"],[.15,"#5a6b8a"],[1,"#ffe9a8"]]},
-  dpet:{short:"PET change",chip:"PET change",name:"Felt-temperature change",unit:"°C",src:0,ch:0,q:"pet",lo:-10,hi:10,diff:true,stops:[[0,"#2166ac"],[.35,"#92c5de"],[.5,"#f4f4f4"],[.65,"#f4a582"],[1,"#b2182b"]]}
+  dpet:{short:"PET change",chip:"PET change",name:"Feels-like temperature change",unit:"°C",src:0,ch:0,q:"pet",lo:-10,hi:10,diff:true,stops:[[0,"#2166ac"],[.35,"#92c5de"],[.5,"#f4f4f4"],[.65,"#f4a582"],[1,"#b2182b"]]}
 };
 const SURF={
   none:{chip:"Photo",name:"",off:true,ch:0,q:"tsurf",lo:0,hi:1,stops:[[0,"#000000"],[1,"#ffffff"]]},
@@ -437,7 +470,7 @@ void main(){ vec3 N=normalize(n); float dif=max(dot(N,u_sun),0.0)*u_day; float a
  o=vec4(fogit(alb*(amb+0.9*dif),w),1.0);}`);
 
 // ============================================================================ state
-const S={man:null,scen:0,ref:0,ped:{on:true,layer:"pet",alpha:.85},surf:"none",photo:true,tf:0,mode:"map",ui:"explore",
+const S={man:null,scen:0,ref:0,ped:{on:true,layer:"pet",alpha:.85},surf:"tsurf",photo:true,tf:0,mode:"map",ui:"explore",
   pos:[0,0],head:45,pitch:0,fov:72,map:{tx:830,ty:760,dist:1500,head:15,pitch:55},
   keys:{},play:false,staticData:null,dirty:true,pick:false,probe:null,cardOpen:false,tourStep:-1};
 let lutP,lutS,stTex,phTex,blankTex;
@@ -589,12 +622,12 @@ function layout(){const br=$("bottom").getBoundingClientRect(),b=innerHeight-br.
     $("layersBtn").style.visibility=$("layersBtn").offsetHeight>room?"hidden":"visible"}
   else{$("navbox").style.visibility="visible";$("layersBtn").style.visibility="visible";$("tourBar").style.top="";
     // keep the info card clear of the nav cluster (bottom right)
-    const nbTop=innerHeight-b-$("navbox").offsetHeight,top=parseFloat(getComputedStyle(ic).top)||58;ic.style.maxHeight=Math.max(160,nbTop-top-10)+"px"}
+    const top=cb.bottom+8;ic.style.top=top+"px";ic.style.maxHeight=Math.max(140,br.top-top-8)+"px"}
   for(const b2 of $("scen").children)if(b2.dataset.key)b2.querySelector(".sh").textContent=SCEN_PHONE[b2.dataset.key]||b2.querySelector(".lg").textContent}
 if(window.ResizeObserver){const ro=new ResizeObserver(()=>layout());for(const id of ["bottom","card","infoCard","layersPop"])ro.observe(document.getElementById(id))}
 PHONE_MQ.addEventListener&&PHONE_MQ.addEventListener("change",()=>{setDevice();layout();S.dirty=true});
 addEventListener("resize",()=>{setDevice();layout()});
-function setLayers(open){S.layersOpen=open;$("layersPop").style.display=open?"block":"none";updateCard();layout()}
+function setLayers(open){S.layersOpen=false;$("layersPop").style.display="none";updateCard();layout()}
 // phones: drag a bottom sheet down by its top strip to close it
 function swipeClose(el,close){let y0=null,dy=0;
   el.addEventListener("pointerdown",e=>{if(!isPhone())return;const r=el.getBoundingClientRect();if(e.clientY-r.top>30||e.target.closest("button,input,select,summary"))return;y0=e.clientY;dy=0;el.setPointerCapture(e.pointerId)});
@@ -608,10 +641,18 @@ function buildUI(){
     const p=S.man.presets[+v.slice(1)];const pk=p.name.match(/at (\d\d):(\d\d)/);if(pk){const h=+pk[1]+pk[2]/60,k=S.man.times.findIndex(t=>Math.abs(t-h)<1e-3);if(k>=0){S.tf=k;onTime()}}
     flyTo({mode:"walk",x:p.x,y:p.y,head:bestHeading(p.x,p.y),pitch:-5})};
   // layer chips
-  const cp=$("chipsPed");for(const k of [...Object.keys(PED),"off"]){if(k==="dpet"&&S.man.scenarios.length<2)continue;const b=document.createElement("button");b.className="chip";b.dataset.ped=k;b.textContent=k==="off"?"Off":PED[k].chip;
-    b.onclick=()=>{if(k==="off")S.ped.on=false;else{S.ped.on=true;S.ped.layer=k}refreshLayers()};cp.appendChild(b)}
-  const cs=$("chipsSurf");for(const k of Object.keys(SURF)){const b=document.createElement("button");b.className="chip";b.dataset.surf=k;b.textContent=k==="solar"&&S.man.solarLabel?"Sunlight":SURF[k].chip;
-    if(k==="solar"&&S.man.solarLabel)b.title=S.man.solarLabel;b.onclick=()=>{S.surf=k;uploadWalls();refreshLayers()};cs.appendChild(b)}
+  const cp=$("chipsPed"),IC={"pet": "<svg viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"4.5\" r=\"2.5\" fill=\"currentColor\"/><path d=\"M5.5 22v-7H4l1.5-6.5h7L14 15h-1.5v7z\" fill=\"currentColor\"/><rect x=\"17\" y=\"3\" width=\"3\" height=\"13\" rx=\"1.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><circle cx=\"18.5\" cy=\"18.5\" r=\"3\" fill=\"currentColor\"/></svg>", "tair": "<svg viewBox=\"0 0 24 24\"><rect x=\"9.5\" y=\"2\" width=\"5\" height=\"14\" rx=\"2.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"/><circle cx=\"12\" cy=\"18.5\" r=\"3.6\" fill=\"currentColor\"/><path d=\"M12 9v8\" stroke=\"currentColor\" stroke-width=\"2\"/></svg>", "rh": "<svg viewBox=\"0 0 24 24\"><path d=\"M12 2.5C9 7 5.5 10.5 5.5 14.5a6.5 6.5 0 0 0 13 0C18.5 10.5 15 7 12 2.5z\" fill=\"currentColor\"/></svg>", "tmrt": "<svg viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"4.5\" fill=\"currentColor\"/><g stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1\"/></g></svg>", "wind": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M3 8h11a3 3 0 1 0-3-3\"/><path d=\"M3 12h16a3 3 0 1 1-3 3\"/><path d=\"M3 16h7\"/></svg>", "surface": "<svg viewBox=\"0 0 24 24\"><path d=\"M2 17l10-5 10 5-10 5z\" fill=\"currentColor\" opacity=\".55\"/><path d=\"M8 14V6l5-2.5 5 2.5v8l-5 2.5z\" fill=\"currentColor\"/></svg>"};cp.innerHTML="";
+  const mk=(k,cls,html,title)=>{const b=document.createElement("button");b.className="chip "+cls;b.dataset.ped=k;b.innerHTML=html;b.title=title;
+    b.onclick=()=>{if(k==="surface"){S.ped.on=false;S.surf="tsurf";uploadWalls()}else{S.ped.on=true;S.ped.layer=k}refreshLayers()};return b};
+  const top=document.createElement("div");top.className="vtop";
+  top.appendChild(mk("pet","vbig",IC.pet+"<span>Feels-like temperature</span><small>PET</small>","Feels-like temperature (PET) at 1.1 m: how hot the street feels"));
+  if(S.man.scenarios.length>1)top.appendChild(mk("dpet","vdelta","&Delta; change","Change of the feels-like temperature against the comparison scenario"));
+  cp.appendChild(top);
+  const sub=document.createElement("div");sub.className="vsub";
+  for(const [k,t,ti] of [["tair","Air","Air temperature at 1.1 m"],["rh","Humidity","Relative humidity at 1.1 m"],["tmrt","Radiation","Radiant heat (Tmrt): sun and warm surfaces"],["wind","Wind","Wind at 1.1 m (moving streaks show the direction)"]]){
+    if(k==="rh"&&!S.man.q.rh)continue;sub.appendChild(mk(k,"vico",IC[k]+`<span>${t}</span>`,ti))}
+  cp.appendChild(sub);const sep=document.createElement("div");sep.className="vsep";cp.appendChild(sep);
+  cp.appendChild(mk("surface","vsurf",IC.surface+"<span>Surface temperature</span><small>ground &middot; walls &middot; roofs</small>","Temperature of the pavement, walls and roofs"));
   $("pedAlpha").oninput=e=>{S.ped.alpha=+e.target.value;S.dirty=true};
   $("layersBtn").onclick=e=>{e.stopPropagation();setLayers($("layersPop").style.display!=="block")};
   document.addEventListener("pointerdown",e=>{const p=$("layersPop");if(p.style.display==="block"&&!p.contains(e.target)&&!$("layersBtn").contains(e.target))setLayers(false);
@@ -627,13 +668,13 @@ function buildUI(){
   $("play").onclick=togglePlay;
   $("bAbout").onclick=()=>$("about").style.display="flex";$("aboutClose").onclick=()=>$("about").style.display="none";$("about").onclick=e=>{if(e.target.id==="about")$("about").style.display="none"};
   $("bHelp").onclick=()=>showHelp($("help").style.display!=="block");$("helpX").onclick=()=>showHelp(false);
-  $("infoX").onclick=()=>{S.cardOpen=false;S.probe=null;updateCard();S.dirty=true};
+  $("infoMore").addEventListener("toggle",()=>drawChart());$("infoX").onclick=()=>{S.cardOpen=false;S.probe=null;updateCard();S.dirty=true};
   $("backMap").onclick=toMap;$("zIn").onclick=()=>zoomBtn(0.7);$("zOut").onclick=()=>zoomBtn(1/0.7);
   $("compass").onclick=()=>{tween={k:S.mode==="walk"?"head":"mhead",from:S.mode==="walk"?S.head:S.map.head,t:0}};
   for(const id of ["padF","padB"]){const el=$(id),k=id==="padF"?"KeyW":"KeyS";el.onpointerdown=e=>{S.keys[k]=true;el.setPointerCapture(e.pointerId)};el.onpointerup=el.onpointercancel=()=>{S.keys[k]=false}}
   setupPeg();
   const m=S.man;
-  $("tech").innerHTML=`Model: computational fluid dynamics (Ansys Fluent) for ${m.simDate}, using the earlier coarse-mesh runs of the published SAUC 2026 study (prototype). Felt temperature is PET for a standing adult (Höppe reference person). `+
+  $("tech").innerHTML=`Model: computational fluid dynamics (Ansys Fluent) for ${m.simDate}, using the earlier coarse-mesh runs of the published SAUC 2026 study (prototype). Feels-like temperature is PET for a standing adult (Höppe reference person). `+
    (m.tmrtMode==="geometric"?"Sun and tree shade on people are computed from the building and tree geometry; air temperature, humidity and wind come from the CFD. In these runs the trees do not shade the CFD surfaces, so the surface layers look almost the same with and without trees. ":"Radiant heat is taken from the CFD radiation field. ")+
    `Surface sunlight field: ${m.solarField||"none"}. Ground grid ${m.grid.cell} m. Data built ${m.built}.`;
   if(store.get("expoHelpSeen")!=="1")showHelp(true);
@@ -648,8 +689,7 @@ function refreshScen(){[...$("scen").children].forEach((b,i)=>b.classList.toggle
 function refreshLayers(){const P=PED[S.ped.layer],L=SURF[S.surf];
   gl.bindTexture(gl.TEXTURE_2D,lutP);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,256,1,0,gl.RGBA,gl.UNSIGNED_BYTE,buildLUT(P.stops));
   gl.bindTexture(gl.TEXTURE_2D,lutS);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,256,1,0,gl.RGBA,gl.UNSIGNED_BYTE,buildLUT(L.stops));
-  for(const b of $("chipsPed").children)b.classList.toggle("on",b.dataset.ped==="off"?!S.ped.on:(S.ped.on&&b.dataset.ped===S.ped.layer));
-  for(const b of $("chipsSurf").children)b.classList.toggle("on",b.dataset.surf===S.surf);
+  for(const b of $("chipsPed").querySelectorAll(".chip"))b.classList.toggle("on",b.dataset.ped==="surface"?!S.ped.on:(S.ped.on&&b.dataset.ped===S.ped.layer));
   $("opRow").style.opacity=S.ped.on?1:.4;$("pedAlpha").disabled=!S.ped.on;
   drawLegend();drawMiniBase();updateCard();S.dirty=true}
 function onTime(){$("time").value=S.tf;$("clock").firstChild.nodeValue=fmtClock(timeHour());const s=sunNow();
@@ -667,42 +707,61 @@ function drawLegend(){const a=activeLayer(),lg=$("legend");if(!a){lg.style.displ
     sp.textContent=L.q==="sun"?(v?"full sun":"shade"):(L.diff&&v>0?"+":"")+(L.q==="wind"?v.toFixed(1):Math.round(v));tk.appendChild(sp)}
   $("legCls").textContent=L.classes?"comfortable 18–23 · slightly warm 23–29 · warm 29–35 · hot 35–41 · very hot >41":(L.diff?"blue = cooler · red = hotter":"");
   $("legSrc").textContent=srcNote(a.kind)}
+function _unusedLegend2(){const B=SURF[S.surf];
+  $("leg2T").textContent=(isPhone()?"Buildings":"Walls and roofs: "+(B===SURF.solar&&S.man.solarLabel?S.man.solarLabel:B.short||B.name).toLowerCase())+(B.unit?` (${B.unit})`:"");
+  const c2=$("leg2cv"),x2=c2.getContext("2d"),lb=buildLUT(B.stops);for(let i=0;i<c2.width;i++){const k=Math.round(i/(c2.width-1)*255)*4;x2.fillStyle=`rgb(${lb[k]},${lb[k+1]},${lb[k+2]})`;x2.fillRect(i,0,1,c2.height)}
+  const t2=$("leg2Ticks");t2.innerHTML="";for(const f of [0,.5,1]){const v=lerp(B.lo,B.hi,f),sp=document.createElement("span");sp.style.left=f*100+"%";if(f===0)sp.style.transform="none";if(f===1)sp.style.transform="translateX(-100%)";sp.textContent=Math.round(v);t2.appendChild(sp)}}
 
 // info card
 function cardPoint(){return S.mode==="walk"?S.pos:S.probe}
 function sampleAt(x,y){if(!cur.ready)return null;const k=cellIndex(x,y);if(k<0)return null;const q=S.man.q,w=cur.w,sw=cur.sw;
   const A=ch=>lerp(val(cur.A0.data,k,ch),val(cur.A1.data,k,ch),w),B=ch=>lerp(val(cur.B0.data,k,ch),val(cur.B1.data,k,ch),w),C=ch=>lerp(val(cur.C0.data,k,ch),val(cur.C1.data,k,ch),sw);
   const dq=(key,v)=>q[key][0]+v*(q[key][1]-q[key][0]);
-  return {k,pet:dq("pet",A(0)),tmrt:dq("tmrt",A(1)),tair:dq("tair",A(2)),wind:dq("wind",B(0)),sun:B(1),tsurf:dq("tsurf",C(0)),solar:q.solar?dq("solar",C(1)):NaN}}
+  return {k,pet:dq("pet",A(0)),tmrt:dq("tmrt",A(1)),tair:dq("tair",A(2)),wind:dq("wind",B(0)),sun:B(1),rh:q.rh?dq("rh",B(2)):NaN,tsurf:dq("tsurf",C(0)),solar:q.solar?dq("solar",C(1)):NaN}}
 function petOf(sk,k){const a=cache.get(sk+"|A|"+cur.i0),b=cache.get(sk+"|A|"+cur.i1),q=S.man.q.pet;if(!a||!b)return null;return q[0]+lerp(val(a.data,k,0),val(b.data,k,0),cur.w)*(q[1]-q[0])}
 function classColor(v){const L=PED.pet,t=clamp((v-L.lo)/(L.hi-L.lo),0,1),k=Math.round(t*255)*4,l=buildLUT(L.stops);return `rgb(${l[k]},${l[k+1]},${l[k+2]})`}
 function diffText(dd){return Math.abs(dd)<0.05?"the same":`${Math.abs(dd).toFixed(1)} °C ${dd>0?"hotter":"cooler"}`}
 function updateCard(){if(!S.man)return;const card=$("infoCard"),p=cardPoint();
-  const show=S.cardOpen&&p&&!(isPhone()&&S.layersOpen);const was=card.style.display==="block";card.style.display=show?"block":"none";
-  if(show!==was){if(show&&isPhone())$("infoMore").open=false;requestAnimationFrame(layout)}if(!show)return;
+  if(!isPhone()&&!p&&S.man.presets[0]){S.probe=nearestOutdoor(S.man.presets[0].x,S.man.presets[0].y);S.cardOpen=true;S.dirty=true;return updateCard()}
+  if(!isPhone())S.cardOpen=true;const show=S.cardOpen&&p&&!(isPhone()&&S.layersOpen);const was=card.style.display==="block";card.style.display=show?"block":"none";
+  if(show!==was)requestAnimationFrame(layout);if(!show)return;
   const [x,y]=p,s=sampleAt(x,y),sk=S.man.scenarios[S.scen];
   $("infoWhere").textContent=(S.mode==="walk"?"Where you stand":"At this point")+` · ${shortName(sk).replace(/^\+ /,"")} · ${fmtClock(timeHour())}`;
   if(!s||!isOutdoor(x,y)){$("infoBig").textContent="–";$("infoCls").style.display="none";$("infoSub").textContent=s?"This point is on a building.":"Outside the simulated area.";$("infoCmp").innerHTML="";$("infoTab").innerHTML="";drawChart();return}
   const sunTxt=sunNow().elev<=0?"night":(s.sun>0.6?"in the sun":(s.sun>0.03?"under trees":"in shade"));
   $("infoBig").textContent=s.pet.toFixed(1)+" °C";const c=$("infoCls");c.style.display="inline-block";c.textContent=petClass(s.pet);c.style.background=classColor(s.pet);
-  $("infoSub").textContent=`felt temperature (PET) · ${sunTxt}`;
+  $("infoSub").textContent=`feels-like temperature (PET) · ${sunTxt}`;
   let h="";for(const o of S.man.scenarios){if(o.key===sk.key)continue;const v=petOf(o.key,s.k);if(v===null)continue;const dd=v-s.pet;
     h+=`<div>${cmpName(o)}: ${v.toFixed(1)} °C <span class="${dd>0.05?'warm':(dd<-0.05?'cool':'')}">(${diffText(dd)})</span></div>`}
   $("infoCmp").innerHTML=h;
   $("infoTab").innerHTML=`<tr><td>Air temperature</td><td>${s.tair.toFixed(1)} °C</td></tr><tr><td>Radiant heat (Tmrt)</td><td>${Math.round(s.tmrt)} °C</td></tr>
-   <tr><td>Wind</td><td>${s.wind.toFixed(1)} m/s</td></tr><tr><td>Ground surface</td><td>${Math.round(s.tsurf)} °C</td></tr>`+(isNaN(s.solar)?"":`<tr><td>Sunlight on the ground</td><td>${Math.round(s.solar)} W/m²</td></tr>`);
+   <tr><td>Wind</td><td>${s.wind.toFixed(1)} m/s</td></tr>`+(isNaN(s.rh)?"":`<tr><td>Humidity</td><td>${Math.round(s.rh)} %</td></tr>`)+`<tr><td>Ground surface</td><td>${Math.round(s.tsurf)} °C</td></tr>`;
   drawChart()}
+const PT={k:-1,data:{},tok:0,timer:0},pxc=document.createElement("canvas");pxc.width=pxc.height=1;const pxx=pxc.getContext("2d",{willReadFrequently:true});
+const CHV={pet:{k:"A",ch:0,q:"pet",c:"pet_mean",u:"°"},dpet:{k:"A",ch:0,q:"pet",c:"pet_mean",u:"°"},tair:{k:"A",ch:2,q:"tair",c:"tair_mean",u:"°"},
+  tmrt:{k:"A",ch:1,q:"tmrt",c:"tmrt_mean",u:"°"},wind:{k:"B",ch:0,q:"wind",u:""},rh:{k:"B",ch:2,q:"rh",u:"%"},sun:{k:"B",ch:1,q:"sun",u:""},surface:{k:"C",ch:0,q:"tsurf",u:"°"}};
+const chartVar=()=>S.ped.on?S.ped.layer:"surface",chartTimes=v=>CHV[v].k==="C"?(S.man.surfTimes||S.man.times):S.man.times;
+async function pixelAt(uri,k,ch){const g=S.man.grid,img=new Image();img.src=uri;await img.decode();pxx.clearRect(0,0,1,1);pxx.drawImage(img,k%g.nx,Math.floor(k/g.nx),1,1,0,0,1,1);return pxx.getImageData(0,0,1,1).data[ch]/255}
+function wantSeries(k,v){const id=k+"|"+v;if(id===PT.k)return;clearTimeout(PT.timer);PT.k=id;PT.data={};const tok=++PT.tok;if(k<0)return;
+  PT.timer=setTimeout(async()=>{const m=S.man,d=CHV[v],n=chartTimes(v).length,q=m.q[d.q],order=[S.scen,...m.scenarios.map((_,i)=>i).filter(i=>i!==S.scen)];
+    for(const si of order){const sk=keyOf(si),F=EXPO.frames[sk],imgs=d.k==="A"?F.imgA:(d.k==="B"?F.imgB:F.imgC),arr=new Array(n).fill(NaN);PT.data[sk]=arr;
+      for(let i=0;i<n&&i<imgs.length;i++){if(tok!==PT.tok)return;const e=cache.get(sk+"|"+d.k+"|"+i);const x=e?e.data[k*4+d.ch]/255:await pixelAt(imgs[i],k,d.ch);
+        arr[i]=(d.q==="pet"&&x===0)?NaN:q[0]+x*(q[1]-q[0]);if(i%8===7||i===n-1)drawChart()}}},200)}
 function drawChart(){const c=$("chart"),x=c.getContext("2d"),W=c.width,H=c.height,m=S.man,L={l:28,r:6,t:8,b:18};x.clearRect(0,0,W,H);
-  const t=m.times,t0=t[0],t1=t[t.length-1];let lo=1e9,hi=-1e9;for(const s of m.scenarios)for(const v of m.curves[s.key].pet_mean){lo=Math.min(lo,v);hi=Math.max(hi,v)}
-  lo=Math.floor(lo/5)*5;hi=Math.ceil(hi/5)*5;const X=v=>L.l+(v-t0)/(t1-t0)*(W-L.l-L.r),Y=v=>H-L.b-(v-lo)/(hi-lo)*(H-L.t-L.b);
+  const cvv=chartVar(),D=CHV[cvv],p=cardPoint(),pk=p&&(cvv==="surface"||isOutdoor(p[0],p[1]))?cellIndex(p[0],p[1]):-1;wantSeries(pk,cvv);
+  const pt=pk>=0&&PT.k===pk+"|"+cvv&&Object.keys(PT.data).length>0,nul=[],ser=s=>pt&&PT.data[s.key]?PT.data[s.key]:(D.c?m.curves[s.key][D.c]:nul);
+  const t=chartTimes(cvv),t0=m.times[0],t1=m.times[m.times.length-1];let lo=1e9,hi=-1e9;for(const s of m.scenarios)for(const v of ser(s))if(isFinite(v)){lo=Math.min(lo,v);hi=Math.max(hi,v)}if(lo>hi){lo=20;hi=40}
+  const stp=[0.5,1,2,5,10,20].find(z=>(hi-lo)/z<=5)||20;lo=Math.floor(lo/stp)*stp;hi=Math.ceil(hi/stp)*stp;if(hi===lo)hi=lo+stp;const X=v=>L.l+(v-t0)/(t1-t0)*(W-L.l-L.r),Y=v=>H-L.b-(v-lo)/(hi-lo)*(H-L.t-L.b);
   x.font="10px system-ui";x.fillStyle="#aab3c2";x.strokeStyle="rgba(255,255,255,.12)";
-  for(let v=lo;v<=hi;v+=5){x.beginPath();x.moveTo(L.l,Y(v));x.lineTo(W-L.r,Y(v));x.stroke();x.fillText(v+"°",3,Y(v)+3)}
+  for(let v=lo;v<=hi+1e-9;v+=stp){x.beginPath();x.moveTo(L.l,Y(v));x.lineTo(W-L.r,Y(v));x.stroke();x.fillText((stp<1?v.toFixed(1):Math.round(v))+D.u,3,Y(v)+3)}
   for(let h=Math.ceil(t0/3)*3;h<=t1;h+=3)x.fillText(String(h).padStart(2,"0")+"h",X(h)-9,H-5);
   const cols=["#ff8a5c","#6fd3a0","#7fb2ff","#e9d16b"];
-  m.scenarios.forEach((s,i)=>{const v=m.curves[s.key].pet_mean;x.strokeStyle=cols[i%4];x.lineWidth=i===S.scen?2.6:1.4;x.beginPath();v.forEach((y,k)=>{k?x.lineTo(X(t[k]),Y(y)):x.moveTo(X(t[k]),Y(y))});x.stroke();x.fillStyle=cols[i%4];x.fillText(shortName(s).replace(/^\+ /,""),L.l+4,L.t+10+12*i)});
+  m.scenarios.forEach((s,i)=>{const v=ser(s);x.strokeStyle=cols[i%4];x.lineWidth=i===S.scen?2.6:1.4;x.beginPath();let st=false;v.forEach((y,k)=>{if(!isFinite(y)||k>=t.length){st=false;return}st?x.lineTo(X(t[k]),Y(y)):x.moveTo(X(t[k]),Y(y));st=true});x.stroke();x.fillStyle=cols[i%4];x.fillText(shortName(s).replace(/^\+ /,""),L.l+4,L.t+10+12*i)});
   const th=timeHour();x.strokeStyle="#fff";x.lineWidth=1;x.beginPath();x.moveTo(X(th),L.t);x.lineTo(X(th),H-L.b);x.stroke();
   const cs=m.curves[keyOf(S.scen)],k=Math.round(clamp(S.tf,0,t.length-1));
-  $("chartnote").textContent=`Whole superblock: average felt temperature on streets and squares. At ${fmtClock(th)}, ${Math.round(cs.frac35[k]*100)}% of the street area is above 35 °C.`}
+  const vn=cvv==="surface"?"Surface temperature":(cvv==="dpet"?PED.pet.name:PED[cvv].name),un=cvv==="surface"||D.u==="°"?" (°C)":(cvv==="wind"?" (m/s)":(cvv==="rh"?" (%)":""));
+  $("chartnote").textContent=pt?`${vn}${un} at the pin, through the day${Object.keys(PT.data).length<m.scenarios.length?" (loading…)":""}.`
+    :(pk>=0?"Loading the day curve at the pin…":"Click the map to place the pin.")}
 
 // mini-map (Street View only)
 const mini=$("minicv"),mctx=mini.getContext("2d"),mbase=document.createElement("canvas");
@@ -737,7 +796,7 @@ function timeIndex(t){if(t==="peak")return S.man.peakIndex||0;let b=0,bd=1e9;S.m
 async function runTour(i){const st=TOUR[i];if(st.requires&&roleIndex(st.requires)<0)return;if(S.play)togglePlay();   // a tour step holds its time
   S.tourStep=i;[...$("tourBtns").children].forEach((b,j)=>b.classList.toggle("on",j===i));$("caption").style.display="block";$("caption").textContent="…";
   const si=roleIndex(st.scenario),ri=st.ref?roleIndex(st.ref):0;S.scen=si<0?0:si;S.ref=ri<0?0:ri;
-  S.ped.on=st.layer!=="off";if(st.layer!=="off")S.ped.layer=st.layer;S.surf=st.surf||"none";S.tf=timeIndex(st.time);
+  S.ped.on=st.layer!=="off";if(st.layer!=="off")S.ped.layer=st.layer;S.surf=st.surf&&st.surf!=="none"?st.surf:"tsurf";S.tf=timeIndex(st.time);
   let p=placeOf(st);if(!p&&st.place==="paintBest")p=await bestSpot(keyOf(S.scen),keyOf(S.ref),S.tf);
   refreshLayers();await onTime();await refreshScen();uploadWalls();
   const head=bestHeading(p.x,p.y);
@@ -836,8 +895,35 @@ function step(now){const dt=Math.min((now-lastT)/1000,0.1);lastT=now;resize();co
     if(tween.t>=1)tween=null;S.dirty=true}
   if(S.play){playAcc+=dt;if(playAcc>0.05){S.tf+=playAcc*1.2;playAcc=0;if(S.tf>=S.man.times.length-1){S.tf=S.man.times.length-1;togglePlay()}onTime()}}
   cardAcc+=dt;if(S.dirty&&cardAcc>0.15&&S.mode==="walk"){cardAcc=0;updateCard()}
+  windStep(dt);
   if(S.dirty&&cur.ready){render();drawMini();placePin();$("compSvg").style.transform=`rotate(${-(S.mode==="walk"?S.head:S.map.head)}deg)`;S.dirty=false}
   requestAnimationFrame(step)}
+// ---- animated wind streaks on the Wind layer: particles carried by the 8 m wind field of the shown time
+const WV={uv:{},parts:[],key:"",ctx:null,was:false};
+function windField(sk){if(WV.uv[sk]!==undefined)return WV.uv[sk];const F=EXPO.frames[sk];WV.uv[sk]=null;
+  if(F.windUV&&S.man.windGrid)gunzip(F.windUV).then(b=>{WV.uv[sk]=new Int8Array(b.buffer,b.byteOffset,b.length)});return null}
+function windAt(a,x,y){const g=S.man.windGrid,n=g.nx*g.ny,c=(x-g.x0)/g.cell-0.5,r=(g.y1-y)/g.cell-0.5,c0=Math.floor(c),r0=Math.floor(r);
+  if(c0<0||r0<0||c0>=g.nx-1||r0>=g.ny-1)return null;const fx=c-c0,fy=r-r0;let u=0,v=0;
+  for(const [ti,wt] of [[cur.i0,1-cur.w],[cur.i1,cur.w]]){if(wt<=0)continue;const o=ti*n*2;
+    for(const [dc,dr,ww] of [[0,0,(1-fx)*(1-fy)],[1,0,fx*(1-fy)],[0,1,(1-fx)*fy],[1,1,fx*fy]]){const k=o+((r0+dr)*g.nx+c0+dc)*2;u+=a[k]*ww*wt;v+=a[k+1]*ww*wt}}
+  return [u/g.scale,v/g.scale]}
+function windSpawn(p){const g=S.man.grid;for(let t=0;t<25;t++){let x,y;
+    if(S.mode==="walk"){const a=Math.random()*6.2832,r=4+Math.random()*130;x=S.pos[0]+r*Math.sin(a);y=S.pos[1]+r*Math.cos(a)}
+    else{x=g.x0+Math.random()*(g.x1-g.x0);y=g.y0+Math.random()*(g.y1-g.y0)}
+    if(isOutdoor(x,y)){p.x=x;p.y=y;p.age=0;p.life=50+Math.random()*90;return}}p.x=NaN;p.age=0;p.life=5}
+function windStep(dt){const cw=$("windcv"),dpr=Math.min(window.devicePixelRatio||1,2),W=Math.round(innerWidth*dpr),H=Math.round(innerHeight*dpr);
+  if(cw.width!==W||cw.height!==H){cw.width=W;cw.height=H;WV.key=""}const ctx=WV.ctx||(WV.ctx=cw.getContext("2d"));
+  const on=S.ped.on&&S.ped.layer==="wind"&&cur.ready&&!!S.man.windGrid;if(!on){if(WV.was){ctx.clearRect(0,0,W,H);WV.was=false;WV.parts=[]}return}
+  const a=windField(keyOf(S.scen));if(!a)return;WV.was=true;
+  const key=[S.mode,S.map.tx,S.map.ty,S.map.dist,S.map.head,S.map.pitch,S.pos,S.head,S.pitch,S.fov,W,H].join("|");
+  if(key!==WV.key){ctx.clearRect(0,0,W,H);WV.key=key}
+  else{ctx.globalCompositeOperation="destination-in";ctx.fillStyle="rgba(0,0,0,0.93)";ctx.fillRect(0,0,W,H);ctx.globalCompositeOperation="source-over"}
+  const N=isPhone()?900:2200;while(WV.parts.length<N){const p={};windSpawn(p);WV.parts.push(p)}
+  const k=S.mode==="map"?Math.max(8,S.map.dist/22):5;ctx.strokeStyle="rgba(255,255,255,0.9)";ctx.lineWidth=1.3*dpr;ctx.lineCap="round";ctx.beginPath();
+  for(const p of WV.parts){if(++p.age>p.life||!isFinite(p.x)){windSpawn(p);continue}const v=windAt(a,p.x,p.y);if(!v){windSpawn(p);continue}
+    const nx=p.x+v[0]*k*dt,ny=p.y+v[1]*k*dt;if(!isOutdoor(nx,ny)){windSpawn(p);continue}
+    const s0=project(p.x,p.y,1.2),s1=project(nx,ny,1.2);p.x=nx;p.y=ny;if(!s0||!s1)continue;ctx.moveTo(s0[0]*dpr,s0[1]*dpr);ctx.lineTo(s1[0]*dpr,s1[1]*dpr)}
+  ctx.stroke()}
 function placePin(){const pin=$("pin");if(S.mode!=="map"||!S.cardOpen||!S.probe){pin.style.display="none";return}const p=project(S.probe[0],S.probe[1],1.1);
   if(!p){pin.style.display="none";return}pin.style.display="block";pin.style.left=p[0]+"px";pin.style.top=p[1]+"px"}
 function bindTex(u,t,P,n){if(P.u[n]===undefined||P.u[n]===null)return;gl.activeTexture(gl.TEXTURE0+u);gl.bindTexture(gl.TEXTURE_2D,t);gl.uniform1i(P.u[n],u)}
@@ -849,13 +935,13 @@ function render(){const c=camera(),sun=sunNow(),sk=skyCols(sun.elev),g=S.man.gri
   gl.enable(gl.DEPTH_TEST);gl.depthMask(true);
   const common=Pr=>{gl.uniformMatrix4fv(Pr.u.u_vp,false,c.VP);gl.uniform3fv(Pr.u.u_cam,c.eye);gl.uniform3fv(Pr.u.u_fog,sk.hor);gl.uniform1f(Pr.u.u_fogd,fogd);
     gl.uniform3fv(Pr.u.u_sun,sun.elev>0?sun.dir:[0,0,1]);gl.uniform1f(Pr.u.u_day,day);if(Pr.u.u_grid)gl.uniform4f(Pr.u.u_grid,g.x0,g.y0,g.x1,g.y1)};
-  const surfU=Pr=>{gl.uniform1f(Pr.u.u_smix,cur.sw);gl.uniform1f(Pr.u.u_sOn,L.off?0:1);gl.uniform1f(Pr.u.u_sch,L.ch);gl.uniform2f(Pr.u.u_sq,qs[0],qs[1]);gl.uniform2f(Pr.u.u_sdisp,L.lo,L.hi);
+  const surfU=(Pr,on)=>{gl.uniform1f(Pr.u.u_smix,cur.sw);gl.uniform1f(Pr.u.u_sOn,on&&!L.off?1:0);gl.uniform1f(Pr.u.u_sch,L.ch);gl.uniform2f(Pr.u.u_sq,qs[0],qs[1]);gl.uniform2f(Pr.u.u_sdisp,L.lo,L.hi);
     bindTex(4,cur.C0.tex,Pr,"u_C0");bindTex(5,cur.C1.tex,Pr,"u_C1");bindTex(9,lutS,Pr,"u_lutS");bindTex(6,stTex,Pr,"u_st")};
-  gl.disable(gl.CULL_FACE);gl.useProgram(GROUND.p);common(GROUND);surfU(GROUND);
+  gl.disable(gl.CULL_FACE);gl.useProgram(GROUND.p);common(GROUND);surfU(GROUND,!S.ped.on);
   bindTex(2,cur.B0.tex,GROUND,"u_B0");bindTex(3,cur.B1.tex,GROUND,"u_B1");bindTex(7,phTex,GROUND,"u_ph");
   gl.uniform1f(GROUND.u.u_mix,cur.w);gl.uniform1f(GROUND.u.u_photo,S.photo?1:0);const o=EXPO.ortho||{x0:0,y0:0,x1:1,y1:1};gl.uniform4f(GROUND.u.u_orect,o.x0,o.y0,o.x1,o.y1);
   gl.bindVertexArray(vaoG);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
-  gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.useProgram(BLDG.p);common(BLDG);surfU(BLDG);gl.bindVertexArray(vaoB);gl.drawElements(gl.TRIANGLES,nIdxB,gl.UNSIGNED_INT,0);
+  gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.useProgram(BLDG.p);common(BLDG);surfU(BLDG,!S.ped.on);gl.bindVertexArray(vaoB);gl.drawElements(gl.TRIANGLES,nIdxB,gl.UNSIGNED_INT,0);
   if(S.man.scenarios[S.scen].trees){gl.useProgram(TREE.p);common(TREE);gl.uniform1f(TREE.u.u_part,0);gl.bindVertexArray(vaoT);gl.drawElementsInstanced(gl.TRIANGLES,crownN,gl.UNSIGNED_SHORT,0,nT);
     gl.disable(gl.CULL_FACE);gl.uniform1f(TREE.u.u_part,1);gl.bindVertexArray(vaoTr);gl.drawElementsInstanced(gl.TRIANGLES,trunkN,gl.UNSIGNED_SHORT,0,nT)}
   if(S.ped.on){gl.disable(gl.CULL_FACE);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
@@ -898,7 +984,7 @@ function render(){const c=camera(),sun=sunNow(),sk=skyCols(sun.elev),g=S.man.gri
 <div id="protoNotice" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(10,14,22,.55)">
   <div style="max-width:560px;margin:16px;padding:18px 20px;border-radius:12px;background:#1d2330;color:#e9edf3;font:14px/1.55 system-ui,sans-serif">
     <div style="font-size:16px;font-weight:600;margin-bottom:6px">Prototype</div>
-    <div>Prototype for discussion. It shows an earlier simulation of 30 July 2026 in the Poblenou superblock (Yamada et al. 2026, Street Art &amp; Urban Creativity 12(5), <a href="https://doi.org/10.66838/sauc.6427" target="_blank" rel="noopener" style="color:#9cc7ff">doi:10.66838/sauc.6427</a>). Known limits: tree shade enters only the 1.1 m felt temperature, not the surface temperatures; roofs receive no sunlight in these exports; the simulation runs about 3&ndash;4 &deg;C warm at noon compared with street measurements. New simulations will replace these results.</div>
+    <div>Prototype for discussion. It shows a new simulation of 30 July 2026 in the Poblenou superblock with the existing street trees (2026-10 run, after two days of spin-up; the earlier version is published in Yamada et al. 2026, Street Art &amp; Urban Creativity 12(5), <a href="https://doi.org/10.66838/sauc.6427" target="_blank" rel="noopener" style="color:#9cc7ff">doi:10.66838/sauc.6427</a>). Known limits: the street air runs about 4 &deg;C warm at midday compared with street measurements, so the feels-like temperature is likely too high; the open edge of the model area is not shown; the scenarios without trees and with reflective roads are still being computed.</div>
     <button id="protoOk" class="btn" style="margin-top:12px">Got it</button>
   </div>
 </div>
