@@ -39,6 +39,15 @@ select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);bo
 #infoMore{margin-top:8px} #infoMore summary{cursor:pointer;color:var(--mute);font-size:12.5px}
 #infoMore table{width:100%;border-collapse:collapse;margin:6px 0;font-variant-numeric:tabular-nums;font-size:13px}
 #infoMore td{padding:2px 0;border-bottom:1px solid var(--line)} #infoMore td:last-child{text-align:right}
+#infoMore td:nth-child(2){text-align:right} #infoMore td.ip{text-align:right;color:var(--mute);padding-left:10px;width:74px}
+#infoMore tr.th td{font-size:11px;color:var(--mute);border-bottom:0;padding-bottom:0} #infoMore tr.th td:nth-child(2){color:var(--ink)}
+#infoMore tr.fn td{font-size:10.5px;color:var(--mute);border-bottom:0;text-align:left;padding-top:4px;line-height:1.3}
+/* scrollbars in the panel style (thin, dark, rounded) */
+@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}}
+::-webkit-scrollbar-button{display:none;width:0;height:0}
+::-webkit-scrollbar{width:8px;height:8px} ::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.22);border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.38);background-clip:padding-box} ::-webkit-scrollbar-corner{background:transparent}
 #chart{width:100%;height:140px;display:block;margin-top:6px} #chartnote{font-size:11px;color:var(--mute)}
 #pin{position:fixed;width:34px;height:34px;margin:-34px 0 0 -17px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6));pointer-events:none;display:none;z-index:3}
 /* bottom: legend + time bar */
@@ -111,6 +120,7 @@ button,select,.chip{touch-action:manipulation}
 #windcv{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
 #card{width:328px;max-width:calc(100% - 24px)}
 #gotoRow{display:none!important}
+#card h1,body.phone #card h1{display:none!important}   /* no title row and no Tour/Explore switch for now: more room for the chart */
 /* variable picker: PET with the four things it is made of, surface temperature apart */
 #vars{border-top:1px solid var(--line);padding-top:8px}
 #chipsPed{display:flex;flex-direction:column;gap:6px;margin:0}
@@ -148,7 +158,8 @@ body.phone #vars{order:5;flex-basis:100%;border-top:0;padding-top:0}
 body.phone #chipsPed{flex-direction:row;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none}
 body.phone #chipsPed::-webkit-scrollbar{display:none}
 body.phone #chipsPed small,body.phone .vlab,body.phone .vsub .chip span,body.phone .vsurf span{display:none}
-body.phone .vtop .vbig{flex:0 0 auto;font-size:13px;padding:6px 9px} body.phone .vsub{display:flex;margin-left:2px;padding-left:6px}
+body.phone .vtop{flex:0 0 auto;gap:4px} body.phone .vtop .vbig{flex:0 0 auto;font-size:13px;padding:6px 9px}
+body.phone .vtop .chip span{display:none} body.phone #chipsPed .vbig small{display:inline;margin-left:0;color:inherit;font-size:13px;font-weight:600} body.phone .vsub{display:flex;margin-left:2px;padding-left:6px}
 body.phone .vsep{width:1px;height:28px;margin:0 2px} body.phone #chipsPed .chip{min-height:38px;flex:0 0 auto}
 body.phone .seg button{min-height:40px;padding:6px 9px;font-size:13px}
 body.phone #goto{width:44px;height:44px;padding:0;color:transparent;-webkit-appearance:none;appearance:none;cursor:pointer;
@@ -572,7 +583,11 @@ function mapEye(m){const h=m.head*Math.PI/180,p=m.pitch*Math.PI/180;return [m.tx
 function camera(){const asp=cv.width/cv.height;let eye,ctr,fov,near;
   if(S.mode==="walk"){eye=[S.pos[0],S.pos[1],1.6];const d=eyeDir();ctr=[eye[0]+d[0],eye[1]+d[1],eye[2]+d[2]];fov=S.fov;near=0.25}
   else{eye=mapEye(S.map);ctr=[S.map.tx,S.map.ty,0];fov=45;near=Math.max(1,S.map.dist*0.01)}
-  const VP=M4.mul(M4.persp(fov*Math.PI/180,asp,near,12000),M4.look(eye,ctr,[0,0,1]));return {VP,IVP:M4.inv(VP),eye}}
+  const VP=M4.mul(M4.persp(fov*Math.PI/180,asp,near,12000),M4.look(eye,ctr,[0,0,1]));
+  // map view: centre the picture in the part of the screen the left panel leaves free (clip x += dx*w)
+  const mp=S.mode==="map",dx=mp?(S.leftPad||0)/Math.max(1,cv.clientWidth):0,dy=mp?((S.botPad||0)-(S.topPad||0))/Math.max(1,cv.clientHeight):0;
+  if(dx||dy)for(let j=0;j<4;j++){VP[j*4]+=dx*VP[j*4+3];VP[j*4+1]+=dy*VP[j*4+3]}
+  return {VP,IVP:M4.inv(VP),eye}}
 function groundAt(cx,cy){const c=camera(),r=cv.getBoundingClientRect();const nx=(cx-r.left)/r.width*2-1,ny=1-(cy-r.top)/r.height*2;
   const a=mulv(c.IVP,[nx,ny,-1,1]),b=mulv(c.IVP,[nx,ny,1,1]);const p0=[a[0]/a[3],a[1]/a[3],a[2]/a[3]],p1=[b[0]/b[3],b[1]/b[3],b[2]/b[3]];
   if(p1[2]>=p0[2]-1e-6)return null;const t=p0[2]/(p0[2]-p1[2]);if(t<0)return null;return [lerp(p0[0],p1[0],t),lerp(p0[1],p1[1],t)]}
@@ -610,6 +625,8 @@ function setDevice(){document.body.classList.toggle("phone",PHONE_MQ.matches);
   document.body.classList.toggle("touch",matchMedia("(pointer:coarse)").matches||(navigator.maxTouchPoints>0&&!matchMedia("(any-pointer:fine)").matches))}   // touch-only devices: hide +/-
 setDevice();
 function layout(){const br=$("bottom").getBoundingClientRect(),b=innerHeight-br.top+8,ph=isPhone();
+  const lp0=ph?0:$("card").getBoundingClientRect().right,tp0=ph?$("card").getBoundingClientRect().bottom:0,bp0=innerHeight-br.top;
+  if(lp0!==S.leftPad||tp0!==S.topPad||bp0!==S.botPad){S.leftPad=lp0;S.topPad=tp0;S.botPad=bp0;S.dirty=true}
   let up=b;   // bottom offset for the floating buttons
   const lp=$("layersPop"),ic=$("infoCard"),sheet=ph?[lp,ic].find(e=>getComputedStyle(e).display!=="none"):null;
   if(ph){for(const e of [lp,ic])e.style.bottom=(b-4)+"px";if(sheet)up=b-4+sheet.offsetHeight+6}
@@ -646,7 +663,7 @@ function buildUI(){
     b.onclick=()=>{if(k==="surface"){S.ped.on=false;S.surf="tsurf";uploadWalls()}else{S.ped.on=true;S.ped.layer=k}refreshLayers()};return b};
   const top=document.createElement("div");top.className="vtop";
   top.appendChild(mk("pet","vbig",IC.pet+"<span>Feels-like temperature</span><small>PET</small>","Feels-like temperature (PET) at 1.1 m: how hot the street feels"));
-  if(S.man.scenarios.length>1)top.appendChild(mk("dpet","vdelta","&Delta; change","Change of the feels-like temperature against the comparison scenario"));
+  if(S.man.scenarios.length>1)top.appendChild(mk("dpet","vdelta","&Delta;<span> change</span>","Change of the feels-like temperature against the comparison scenario"));
   cp.appendChild(top);
   const sub=document.createElement("div");sub.className="vsub";
   for(const [k,t,ti] of [["tair","Air","Air temperature at 1.1 m"],["rh","Humidity","Relative humidity at 1.1 m"],["tmrt","Radiation","Radiant heat (Tmrt): sun and warm surfaces"],["wind","Wind","Wind at 1.1 m (moving streaks show the direction)"]]){
@@ -734,9 +751,17 @@ function updateCard(){if(!S.man)return;const card=$("infoCard"),p=cardPoint();
   let h="";for(const o of S.man.scenarios){if(o.key===sk.key)continue;const v=petOf(o.key,s.k);if(v===null)continue;const dd=v-s.pet;
     h+=`<div>${cmpName(o)}: ${v.toFixed(1)} °C <span class="${dd>0.05?'warm':(dd<-0.05?'cool':'')}">(${diffText(dd)})</span></div>`}
   $("infoCmp").innerHTML=h;
-  $("infoTab").innerHTML=`<tr><td>Air temperature</td><td>${s.tair.toFixed(1)} °C</td></tr><tr><td>Radiant heat (Tmrt)</td><td>${Math.round(s.tmrt)} °C</td></tr>
-   <tr><td>Wind</td><td>${s.wind.toFixed(1)} m/s</td></tr>`+(isNaN(s.rh)?"":`<tr><td>Humidity</td><td>${Math.round(s.rh)} %</td></tr>`)+`<tr><td>Ground surface</td><td>${Math.round(s.tsurf)} °C</td></tr>`;
+  const ik=k=>inletAt(k),ic=(v,f)=>v===null?'<td class="ip">–</td>':`<td class="ip">${f(v)}</td>`,hasI=!!S.man.inlet;
+  $("infoTab").innerHTML=(hasI?`<tr class="th"><td></td><td>Here</td><td class="ip" title="${S.man.inlet.note}">El Prat*</td></tr>`:"")+
+   `<tr><td>Air temperature</td><td>${s.tair.toFixed(1)} °C</td>${hasI?ic(ik("ta"),v=>v.toFixed(1)+" °C"):""}</tr>`+
+   `<tr><td>Radiant heat (Tmrt)</td><td>${Math.round(s.tmrt)} °C</td>${hasI?ic(null):""}</tr>`+
+   `<tr><td>Wind</td><td>${s.wind.toFixed(1)} m/s</td>${hasI?ic(ik("wind10"),v=>v.toFixed(1)+" m/s"):""}</tr>`+
+   (isNaN(s.rh)?"":`<tr><td>Humidity</td><td>${Math.round(s.rh)} %</td>${hasI?ic(ik("rh"),v=>Math.round(v)+" %"):""}</tr>`)+
+   `<tr><td>Ground surface</td><td>${Math.round(s.tsurf)} °C</td>${hasI?ic(null):""}</tr>`+
+   (hasI?`<tr class="fn"><td colspan="3">* El Prat: Meteocat weather station by the airport, about 10 km SW on the open coast; the model takes its inflow from it. Wind there is measured at 10 m, here at 1.1 m.</td></tr>`:"");
   drawChart()}
+function inletAt(k){const I=S.man.inlet;if(!I||!I[k])return null;const a=I[k],n=a.length,t=clamp(S.tf,0,n-1),i=Math.floor(t),j=Math.min(i+1,n-1);return lerp(a[i],a[j],t-i)}
+const INLET_OF={tair:"ta",rh:"rh",wind:"wind10"};
 const PT={k:-1,data:{},tok:0,timer:0},pxc=document.createElement("canvas");pxc.width=pxc.height=1;const pxx=pxc.getContext("2d",{willReadFrequently:true});
 const CHV={pet:{k:"A",ch:0,q:"pet",c:"pet_mean",u:"°"},dpet:{k:"A",ch:0,q:"pet",c:"pet_mean",u:"°"},tair:{k:"A",ch:2,q:"tair",c:"tair_mean",u:"°"},
   tmrt:{k:"A",ch:1,q:"tmrt",c:"tmrt_mean",u:"°"},wind:{k:"B",ch:0,q:"wind",u:""},rh:{k:"B",ch:2,q:"rh",u:"%"},sun:{k:"B",ch:1,q:"sun",u:""},surface:{k:"C",ch:0,q:"tsurf",u:"°"}};
@@ -750,13 +775,16 @@ function wantSeries(k,v){const id=k+"|"+v;if(id===PT.k)return;clearTimeout(PT.ti
 function drawChart(){const c=$("chart"),x=c.getContext("2d"),W=c.width,H=c.height,m=S.man,L={l:28,r:6,t:8,b:18};x.clearRect(0,0,W,H);
   const cvv=chartVar(),D=CHV[cvv],p=cardPoint(),pk=p&&(cvv==="surface"||isOutdoor(p[0],p[1]))?cellIndex(p[0],p[1]):-1;wantSeries(pk,cvv);
   const pt=pk>=0&&PT.k===pk+"|"+cvv&&Object.keys(PT.data).length>0,nul=[],ser=s=>pt&&PT.data[s.key]?PT.data[s.key]:(D.c?m.curves[s.key][D.c]:nul);
-  const t=chartTimes(cvv),t0=m.times[0],t1=m.times[m.times.length-1];let lo=1e9,hi=-1e9;for(const s of m.scenarios)for(const v of ser(s))if(isFinite(v)){lo=Math.min(lo,v);hi=Math.max(hi,v)}if(lo>hi){lo=20;hi=40}
+  const t=chartTimes(cvv),t0=m.times[0],t1=m.times[m.times.length-1];let lo=1e9,hi=-1e9;for(const s of m.scenarios)for(const v of ser(s))if(isFinite(v)){lo=Math.min(lo,v);hi=Math.max(hi,v)}
+  const iser=m.inlet&&INLET_OF[cvv]?m.inlet[INLET_OF[cvv]]:null;if(iser&&pt)for(const v of iser){lo=Math.min(lo,v);hi=Math.max(hi,v)}if(lo>hi){lo=20;hi=40}
   const stp=[0.5,1,2,5,10,20].find(z=>(hi-lo)/z<=5)||20;lo=Math.floor(lo/stp)*stp;hi=Math.ceil(hi/stp)*stp;if(hi===lo)hi=lo+stp;const X=v=>L.l+(v-t0)/(t1-t0)*(W-L.l-L.r),Y=v=>H-L.b-(v-lo)/(hi-lo)*(H-L.t-L.b);
   x.font="10px system-ui";x.fillStyle="#aab3c2";x.strokeStyle="rgba(255,255,255,.12)";
   for(let v=lo;v<=hi+1e-9;v+=stp){x.beginPath();x.moveTo(L.l,Y(v));x.lineTo(W-L.r,Y(v));x.stroke();x.fillText((stp<1?v.toFixed(1):Math.round(v))+D.u,3,Y(v)+3)}
   for(let h=Math.ceil(t0/3)*3;h<=t1;h+=3)x.fillText(String(h).padStart(2,"0")+"h",X(h)-9,H-5);
   const cols=["#ff8a5c","#6fd3a0","#7fb2ff","#e9d16b"];
   m.scenarios.forEach((s,i)=>{const v=ser(s);x.strokeStyle=cols[i%4];x.lineWidth=i===S.scen?2.6:1.4;x.beginPath();let st=false;v.forEach((y,k)=>{if(!isFinite(y)||k>=t.length){st=false;return}st?x.lineTo(X(t[k]),Y(y)):x.moveTo(X(t[k]),Y(y));st=true});x.stroke();x.fillStyle=cols[i%4];x.fillText(shortName(s).replace(/^\+ /,""),L.l+4,L.t+10+12*i)});
+  if(iser&&pt){x.save();x.setLineDash([4,3]);x.strokeStyle="#c9d1de";x.lineWidth=1.4;x.beginPath();iser.forEach((y,k)=>{k?x.lineTo(X(m.times[k]),Y(y)):x.moveTo(X(m.times[k]),Y(y))});x.stroke();x.restore();
+    x.fillStyle="#c9d1de";x.fillText("El Prat (inflow)"+(cvv==="wind"?", 10 m":""),L.l+4,L.t+10+12*m.scenarios.length)}
   const th=timeHour();x.strokeStyle="#fff";x.lineWidth=1;x.beginPath();x.moveTo(X(th),L.t);x.lineTo(X(th),H-L.b);x.stroke();
   const cs=m.curves[keyOf(S.scen)],k=Math.round(clamp(S.tf,0,t.length-1));
   const vn=cvv==="surface"?"Surface temperature":(cvv==="dpet"?PED.pet.name:PED[cvv].name),un=cvv==="surface"||D.u==="°"?" (°C)":(cvv==="wind"?" (m/s)":(cvv==="rh"?" (%)":""));
