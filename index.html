@@ -466,19 +466,38 @@ void main(){
 
 const TREE=prog(`#version 300 es
 in vec3 a_p; in vec3 a_n; in vec4 a_i; in float a_cb; uniform mat4 u_vp; uniform float u_part;
-out vec3 w; out vec3 n; out float hv;
+out vec3 w; out vec3 n; out vec3 lp; out float hv;
 float hash(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
-void main(){ float h=a_i.z,r=a_i.w,cb=a_cb; vec3 p; hv=hash(a_i.xy);
- if(u_part<0.5){ float a=max(0.5*(h-cb),0.5); vec3 s=vec3(r,r,a); float j=1.0+0.08*sin(dot(a_p,vec3(7.0,5.0,3.0))+hv*20.0);
-   p=vec3(a_i.xy,0.5*(h+cb))+a_p*s*j; n=normalize(a_n/s); }
- else { float tr=0.10+0.012*h; p=vec3(a_i.xy,0.0)+vec3(a_p.xy*tr,a_p.z*(cb+0.35*(h-cb))); n=a_n; }
+// crown: an ellipsoid with clumps at three scales, a flatter underside and a per-tree lean of the lumps
+float lump(vec3 q,float s){return 0.10*sin(q.x*3.1+s*31.0)*sin(q.y*2.7+s*17.0)*sin(q.z*2.3+s*11.0)
+  +0.07*sin(dot(q,vec3(6.1,5.3,4.7))+s*40.0)+0.04*sin(dot(q,vec3(11.0,13.0,9.0))+s*23.0);}
+void main(){ float h=a_i.z,r=a_i.w,cb=a_cb; vec3 p; hv=hash(a_i.xy); lp=a_p;
+ if(u_part<0.5){ float a=max(0.5*(h-cb),0.5); vec3 q=a_p; if(q.z<0.0) q.z*=0.72;
+   float j=1.0+lump(a_p,hv); vec3 s=vec3(r*(0.92+0.16*hv),r*(1.04-0.12*hv),a);
+   p=vec3(a_i.xy,0.5*(h+cb)+0.12*a)+q*s*j; n=normalize(a_n/s); }
+ else { float tr=0.07+0.010*h; float tp=1.0-0.35*clamp(a_p.z,0.0,1.0); p=vec3(a_i.xy,0.0)+vec3(a_p.xy*tr*tp,a_p.z*(cb+0.45*(h-cb))); n=a_n; }
  w=p; gl_Position=u_vp*vec4(p,1.0);}`,
 `#version 300 es
-precision highp float; in vec3 w; in vec3 n; in float hv; out vec4 o; uniform float u_part;
+precision highp float; in vec3 w; in vec3 n; in vec3 lp; in float hv; out vec4 o; uniform float u_part;
 ${COMMON}
-void main(){ vec3 N=normalize(n); float dif=max(dot(N,u_sun),0.0)*u_day; float amb=(0.25+0.30*u_day)*(0.8+0.2*N.z);
- vec3 alb=u_part<0.5?mix(vec3(0.20,0.38,0.16),vec3(0.33,0.50,0.20),hv):vec3(0.36,0.27,0.19);
- o=vec4(fogit(alb*(amb+0.9*dif),w),1.0);}`);
+float h3(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
+float vn(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);
+ return mix(mix(mix(h3(i),h3(i+vec3(1,0,0)),f.x),mix(h3(i+vec3(0,1,0)),h3(i+vec3(1,1,0)),f.x),f.y),
+            mix(mix(h3(i+vec3(0,0,1)),h3(i+vec3(1,0,1)),f.x),mix(h3(i+vec3(0,1,1)),h3(i+vec3(1,1,1)),f.x),f.y),f.z);}
+void main(){ vec3 N=normalize(n);
+ if(u_part<0.5){
+   // leaf clumps: two octaves of noise on the world position bend the normal and set the shade of green
+   float c1=vn(w*0.55),c2=vn(w*1.7+17.0); vec3 Np=normalize(N+0.55*vec3(c1-0.5,c2-0.5,0.5*(c1+c2)-0.5));
+   float dif=max(dot(Np,u_sun),0.0)*u_day; float back=pow(max(dot(-Np,u_sun),0.0),2.0)*0.25*u_day;
+   float ao=mix(0.55,1.0,smoothstep(-0.9,0.7,lp.z))*mix(0.75,1.0,c1);
+   vec3 dark=mix(vec3(0.10,0.22,0.08),vec3(0.14,0.25,0.07),hv), lite=mix(vec3(0.30,0.46,0.16),vec3(0.42,0.54,0.20),hv);
+   vec3 alb=mix(dark,lite,clamp(0.25+0.9*c2*c1+0.3*Np.z,0.0,1.0));
+   float amb=(0.25+0.30*u_day)*(0.8+0.2*Np.z);
+   o=vec4(fogit(alb*(amb*ao+0.9*dif*ao)+vec3(0.20,0.30,0.05)*back,w),1.0);
+ } else {
+   float b=vn(vec3(w.xy*4.0,w.z*0.6)); vec3 alb=mix(vec3(0.24,0.19,0.14),vec3(0.42,0.36,0.28),b);
+   float dif=max(dot(N,u_sun),0.0)*u_day; float amb=(0.25+0.30*u_day)*(0.8+0.2*N.z);
+   o=vec4(fogit(alb*(amb+0.9*dif),w),1.0); }}`);
 
 // ============================================================================ state
 const S={man:null,scen:0,ref:0,ped:{on:true,layer:"pet",alpha:.85},surf:"tsurf",photo:true,tf:0,mode:"map",ui:"explore",
@@ -499,8 +518,8 @@ let vaoB,nIdxB,vaoT,vaoTr,nT,crownN,trunkN,bufT0,bufT1,nVerts,nWall,vaoG,vaoP,va
 function icosphere(){const t=(1+Math.sqrt(5))/2;let v=[[-1,t,0],[1,t,0],[-1,-t,0],[1,-t,0],[0,-1,t],[0,1,t],[0,-1,-t],[0,1,-t],[t,0,-1],[t,0,1],[-t,0,-1],[-t,0,1]].map(norm);
   const f=[[0,11,5],[0,5,1],[0,1,7],[0,7,10],[0,10,11],[1,5,9],[5,11,4],[11,10,2],[10,7,6],[7,1,8],[3,9,4],[3,4,2],[3,2,6],[3,6,8],[3,8,9],[4,9,5],[2,4,11],[6,2,10],[8,6,7],[9,8,1]];
   const mid={},m=(a,b)=>{const k=a<b?a+"_"+b:b+"_"+a;if(mid[k]===undefined){mid[k]=v.length;v.push(norm([(v[a][0]+v[b][0])/2,(v[a][1]+v[b][1])/2,(v[a][2]+v[b][2])/2]))}return mid[k]};
-  const f2=[];for(const [a,b,c] of f){const ab=m(a,b),bc=m(b,c),ca=m(c,a);f2.push([a,ab,ca],[b,bc,ab],[c,ca,bc],[ab,bc,ca])}
-  const P=[],I=[];for(const p of v)P.push(...p,...p);for(const t3 of f2)I.push(...t3);return {P:new Float32Array(P),I:new Uint16Array(I)}}
+  let F=f;for(let it=0;it<2;it++){const f2=[];for(const [a,b,c] of F){const ab=m(a,b),bc=m(b,c),ca=m(c,a);f2.push([a,ab,ca],[b,bc,ab],[c,ca,bc],[ab,bc,ca])}F=f2}
+  const P=[],I=[];for(const p of v)P.push(...p,...p);for(const t3 of F)I.push(...t3);return {P:new Float32Array(P),I:new Uint16Array(I)}}
 function prism(){const P=[],I=[],n=6;for(let k=0;k<=n;k++){const a=k/n*2*Math.PI,c=Math.cos(a),s=Math.sin(a);P.push(c,s,0,c,s,0,c,s,1,c,s,0)}
   for(let k=0;k<n;k++){const a=2*k,b=2*k+1,c=2*k+2,d=2*k+3;I.push(a,c,b,b,c,d)}return {P:new Float32Array(P),I:new Uint16Array(I)}}
 function meshVAO(prg,mesh,inst){const vao=gl.createVertexArray();gl.bindVertexArray(vao);
@@ -719,7 +738,7 @@ function drawLegend(){const a=activeLayer(),lg=$("legend");if(!a){lg.style.displ
   const name=L.diff?`PET change vs. ${shortName(S.man.scenarios[S.ref]).replace(/^\+ /,"").toLowerCase()}`:(L===SURF.solar&&S.man.solarLabel?S.man.solarLabel:L.name);
   $("legT").textContent=(isPhone()&&L.short?(L.diff?L.short+" vs. "+shortName(S.man.scenarios[S.ref]).replace(/^\+ /,"").toLowerCase():L.short):name)+(L.unit?` (${L.unit})`:"");
   const c=$("legcv"),x=c.getContext("2d");for(let i=0;i<c.width;i++){const k=Math.round(i/(c.width-1)*255)*4;x.fillStyle=`rgb(${lut[k]},${lut[k+1]},${lut[k+2]})`;x.fillRect(i,0,1,c.height)}
-  const tk=$("legTicks");tk.innerHTML="";const ticks=L.classes?[18,23,29,35,41,50]:(L.q==="sun"?[0,1]:[0,.25,.5,.75,1].map(f=>lerp(L.lo,L.hi,f)));
+  const tk=$("legTicks");tk.innerHTML="";const ticks=L.classes?[18,23,29,35,41,Math.round(L.hi)]:(L.q==="sun"?[0,1]:[0,.25,.5,.75,1].map(f=>lerp(L.lo,L.hi,f)));
   for(const v of ticks){const sp=document.createElement("span");sp.style.left=clamp((v-L.lo)/(L.hi-L.lo),0,1)*100+"%";if(v===L.lo)sp.style.transform="none";if(v===L.hi)sp.style.transform="translateX(-100%)";
     sp.textContent=L.q==="sun"?(v?"full sun":"shade"):(L.diff&&v>0?"+":"")+(L.q==="wind"?v.toFixed(1):Math.round(v));tk.appendChild(sp)}
   $("legCls").textContent=L.classes?"comfortable 18–23 · slightly warm 23–29 · warm 29–35 · hot 35–41 · very hot >41":(L.diff?"blue = cooler · red = hotter":"");
@@ -903,7 +922,7 @@ function resize(){const dpr=Math.min(devicePixelRatio||1,1.5),w=Math.round(inner
 function skyCols(el){const day=smooth(-6,12,el),dusk=Math.exp(-Math.pow((el-2)/7,2));
   const zen=[lerp(.02,.27,day),lerp(.03,.50,day),lerp(.08,.85,day)],hor=[lerp(.10,.74,day)+.25*dusk,lerp(.12,.84,day)+.05*dusk,lerp(.20,.95,day)-.15*dusk];return {zen,hor:hor.map(v=>clamp(v,0,1)),day}}
 let lastT=performance.now(),cardAcc=0;
-function step(now){const dt=Math.min((now-lastT)/1000,0.1);lastT=now;resize();const k=S.keys;pinchStep();
+function step(now){const dt=window.__fixedDt||Math.min((now-lastT)/1000,0.1);/* __fixedDt: frame-by-frame video capture */lastT=now;resize();const k=S.keys;pinchStep();
   if(fly){fly.t=Math.min(1,fly.t+dt/fly.dur);const e=smooth(0,1,fly.t),f=fly.from,t=fly.to,m=S.map;
     m.tx=lerp(f.tx,t.tx,e);m.ty=lerp(f.ty,t.ty,e);m.dist=Math.exp(lerp(Math.log(f.dist),Math.log(t.dist),e))+fly.lift*Math.sin(Math.PI*e);
     m.head=angLerp(f.head,t.head,e);m.pitch=lerp(f.pitch,t.pitch,e);clampMap();S.dirty=true;if(fly.t>=1){const d=fly.done;fly=null;d()}}
@@ -947,7 +966,7 @@ function windStep(dt){const cw=$("windcv"),dpr=Math.min(window.devicePixelRatio|
   if(key!==WV.key){ctx.clearRect(0,0,W,H);WV.key=key}
   else{ctx.globalCompositeOperation="destination-in";ctx.fillStyle="rgba(0,0,0,0.93)";ctx.fillRect(0,0,W,H);ctx.globalCompositeOperation="source-over"}
   const N=isPhone()?900:2200;while(WV.parts.length<N){const p={};windSpawn(p);WV.parts.push(p)}
-  const k=S.mode==="map"?Math.max(8,S.map.dist/22):5;ctx.strokeStyle="rgba(255,255,255,0.9)";ctx.lineWidth=1.3*dpr;ctx.lineCap="round";ctx.beginPath();
+  const k=(S.mode==="map"?Math.max(8,S.map.dist/22):5)*(window.__windK||1);ctx.strokeStyle="rgba(255,255,255,0.9)";ctx.lineWidth=1.3*dpr;ctx.lineCap="round";ctx.beginPath();
   for(const p of WV.parts){if(++p.age>p.life||!isFinite(p.x)){windSpawn(p);continue}const v=windAt(a,p.x,p.y);if(!v){windSpawn(p);continue}
     const nx=p.x+v[0]*k*dt,ny=p.y+v[1]*k*dt;if(!isOutdoor(nx,ny)){windSpawn(p);continue}
     const s0=project(p.x,p.y,1.2),s1=project(nx,ny,1.2);p.x=nx;p.y=ny;if(!s0||!s1)continue;ctx.moveTo(s0[0]*dpr,s0[1]*dpr);ctx.lineTo(s1[0]*dpr,s1[1]*dpr)}
