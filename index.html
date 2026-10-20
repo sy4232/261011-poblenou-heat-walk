@@ -130,6 +130,14 @@ button,select,.chip{touch-action:manipulation}
 #chipsPed .chip.on small{color:#5a4a20}
 .vtop{display:flex;gap:6px} .vtop .vbig{flex:1;font-size:14px;font-weight:600;padding:8px 10px}
 .vdelta{font-size:12px!important;padding:6px 8px!important}
+#scen button{display:inline-flex;align-items:center;justify-content:center;padding:5px 12px} #scen svg{width:24px;height:24px;display:block}
+#filmBtn{margin-left:auto;display:inline-flex;align-items:center;gap:4px;border-radius:9px;font-size:13px!important;padding:7px 12px!important}
+body.film #filmBtn{background:#ffe2b0;color:#1a1300;border-color:#ffe2b0;font-weight:600}
+body.film #legSrc{display:none!important}
+body.film #infoCard,body.film #mini,body.film #vars,body.film #navbox,body.film #walkpad,body.film #pin{display:none!important}
+#scen #dBtn{font-size:13px}
+#chipsPed .chip:disabled{opacity:.35;cursor:not-allowed}
+
 .vsub{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-left:14px}
 .vsub .chip{flex-direction:column;gap:2px!important;padding:5px 2px!important;font-size:11px;justify-content:center;text-align:center!important}
 .vlab{font-size:10.5px;color:var(--mute);margin:-2px 0 -2px 28px}
@@ -209,8 +217,8 @@ body.phone.tour #infoCmp{font-size:13.5px} body.phone.tour #clock{font-size:17px
 
 <!-- top-left card -->
 <div id="card" class="panel">
-  <h1><span>Poblenou heat walk <small style="font-size:11px;font-weight:500;padding:2px 6px;border-radius:6px;background:#4a3a12;color:#ffd98a;vertical-align:2px">Prototype</small></span><span class="seg" id="modeSeg"><button data-mode="tour">Tour</button><button data-mode="explore" class="on">Explore</button></span></h1>
-  <div class="row"><span class="seg" id="scen"></span></div>
+  <h1><span>Poblenou heat walk</span><span class="seg" id="modeSeg"><button data-mode="tour">Tour</button><button data-mode="explore" class="on">Explore</button></span></h1>
+  <div class="row" id="scenRow"><span class="seg" id="scen"></span></div>
   <div id="vars"><div id="chipsPed"></div></div>
   <div class="row" id="gotoRow"><select id="goto" title="Go to a place" aria-label="Go to a place"><option value="">Go to&hellip;</option></select></div>
   <button class="btn" id="bMenu" title="Help and About" aria-label="Menu">&#9776;</button>
@@ -269,14 +277,14 @@ body.phone.tour #infoCmp{font-size:13.5px} body.phone.tour #clock{font-size:17px
 
 <div id="about"><div class="cardx">
   <h3>What you are looking at</h3>
-  <p>A computer simulation of one clear, hot summer day (30 July) in the Poblenou superblock in Barcelona.</p>
+  <p>A computer simulation of one clear, hot summer day (July 30, 2026) in the Poblenou superblock in Barcelona.</p>
   <ul>
     <li><b>At 1.1 m</b>: a see-through sheet at the height of a person's body, showing how hot the street <b>feels</b> as a feels-like temperature (PET, &deg;C). PET combines air temperature, sun and shade, heat radiated by surfaces, humidity and wind. Comfortable 18&ndash;23 &deg;C, slightly warm 23&ndash;29, warm 29&ndash;35, hot 35&ndash;41, very hot above 41.</li>
     <li><b>Surface temperature</b>: the temperature of the pavement, walls and roofs from the simulation. <b>Wind</b> shows the wind speed at 1.1 m, with moving streaks for its direction.</li>
-    <li><b>Scenarios</b> at the top left compare the street with and without trees. <b>Tour</b> walks through the main results in three steps.</li>
+    <li>The <b>tree buttons</b> at the top left switch between the street without trees and with the existing trees; <b>Difference</b> shows with trees minus without trees. <b>Tour</b> plays a one-minute walk through the results.</li>
     <li>Click any point on the map to see its numbers. Open <b>Help</b> for the controls.</li>
   </ul>
-  <p style="font-size:12.5px">Prototype for discussion. It shows a new simulation of 30 July 2026 in the Poblenou superblock with the existing street trees (2026-10 run, after two days of spin-up; the earlier version is published in Yamada et al. 2026, Street Art &amp; Urban Creativity 12(5), <a href="https://doi.org/10.66838/sauc.6427" target="_blank" rel="noopener" style="color:#9cc7ff">doi:10.66838/sauc.6427</a>). Known limits: the street air runs about 4 &deg;C warm at midday compared with street measurements, so the feels-like temperature is likely too high; the open edge of the model area is not shown; the scenarios without trees and with reflective roads are still being computed.</p>
+  <p style="font-size:12.5px">It shows simulations of July 30, 2026 in the Poblenou superblock without street trees and with the existing street trees (October 2026 runs, after two days of spin-up; an earlier version is published in Yamada et al. 2026, Street Art &amp; Urban Creativity 12(5), <a href="https://doi.org/10.66838/sauc.6427" target="_blank" rel="noopener" style="color:#9cc7ff">doi:10.66838/sauc.6427</a>). Known limits: the street air runs about 4 &deg;C warm at midday compared with street measurements, so the feels-like temperature is likely too high; the open edge of the model area is not shown.</p>
   <p style="color:var(--mute);font-size:12px">Data sources: aerial photo &copy; Institut Cartogr&agrave;fic i Geol&ograve;gic de Catalunya (ICGC), ortofoto 25 cm 2025; street trees: Ajuntament de Barcelona, Open Data BCN (Arbrat viari, Arbrat zona); building footprints: Direcci&oacute;n General del Catastro; weather forcing: Servei Meteorol&ograve;gic de Catalunya (Meteocat). Simulation and viewer: NYU, UPC and Hochschule Mainz.</p>
   <p style="color:var(--mute);font-size:12.5px" id="tech"></p>
   <button class="btn" id="aboutClose">Close</button>
@@ -289,18 +297,24 @@ body.phone.tour #infoCmp{font-size:13.5px} body.phone.tour #clock{font-size:17px
 // Short names for the scenario buttons and the comparison line, by scenario key.
 const SCEN_SHORT={nonveg:"No trees",bare:"No trees",veg:"Existing trees",itree:"Existing trees",paint:"+ Reflective roads",reflective:"+ Reflective roads"};
 const SCEN_PHONE={nonveg:"No trees",bare:"No trees",veg:"Trees",itree:"Trees",paint:"+ Paint",reflective:"+ Paint"};   // phone button labels
+const SCEN_ICON={   // scenario buttons: a crossed-out tree (no trees) and a tree (existing trees)
+  bare:'<svg viewBox="0 0 24 24"><g opacity=".45"><g fill="currentColor"><circle cx="12" cy="7" r="4.6"/><circle cx="7.6" cy="11" r="4"/><circle cx="16.4" cy="11" r="4"/><circle cx="12" cy="12" r="4"/><rect x="10.9" y="13" width="2.2" height="9" rx="1"/></g></g><path d="M3.5 21.5L20.5 2.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
+  itree:'<svg viewBox="0 0 24 24"><g fill="currentColor"><circle cx="12" cy="7" r="4.6"/><circle cx="7.6" cy="11" r="4"/><circle cx="16.4" cy="11" r="4"/><circle cx="12" cy="12" r="4"/><rect x="10.9" y="13" width="2.2" height="9" rx="1"/></g></svg>'};
+SCEN_ICON.nonveg=SCEN_ICON.bare;SCEN_ICON.veg=SCEN_ICON.itree;
 const TOUR_SHORT=["Heat","Trees","Roads"];   // phone labels of the tour steps
 const SCEN_CMP={nonveg:"Without trees",bare:"Without trees",veg:"With existing trees",itree:"With existing trees",paint:"With reflective roads",reflective:"With reflective roads"};
 const ROLE={base:["nonveg","bare"],trees:["veg","itree"],paint:["paint","reflective"]};   // scenario roles used by the tour
+// Av. Diagonal plane trees near C/ Pallars: strongest 20 m-averaged PET cooling by trees on the Diagonal, 13-17 h (2026-10-19)
+const DIAG={x:1127,y:659.5};
 // Tour steps. place: "hottest" | "cooling" | "paintBest" | {x,y}; time: "peak" | local hour;
 // scenario/ref: a role from ROLE; layer: 1.1 m layer key; view: "street" | "oblique".
 // Step 1 and 2 use the same spot ("cooling", the street where trees cool most at the peak) so that
 // step 2 shows the trees' effect where it matters; set place:"hottest" to start at the hottest street.
 const TOUR=[
-  {title:"Peak heat",place:"cooling",time:"peak",scenario:"base",layer:"pet",surf:"none",view:"street",pitch:-8,
-   caption:v=>`${v.clock} on a clear July day: without trees this street feels like ${v.pet} °C (${v.cls.toLowerCase()}). ${v.frac35}% of the superblock's streets are above 35 °C.`},
-  {title:"What street trees do",place:"cooling",time:"peak",scenario:"trees",ref:"base",layer:"dpet",surf:"none",view:"street",pitch:-8,
-   caption:v=>`With today's trees the same street feels like ${v.pet} °C, ${v.dAbs} °C ${v.dWord} than without them. Blue on the ground shows where trees cool.`},
+  {title:"Peak heat",place:DIAG,time:"peak",scenario:"base",layer:"pet",surf:"none",view:"street",pitch:-8,
+   caption:v=>`${v.clock} on a clear July day: without its trees, Avinguda Diagonal here would feel like ${v.pet} °C (${v.cls.toLowerCase()}). ${v.frac35}% of the superblock's streets are above 35 °C.`},
+  {title:"What street trees do",place:DIAG,time:"peak",scenario:"trees",ref:"base",layer:"dpet",surf:"none",view:"street",pitch:-8,
+   caption:v=>`With its plane trees, Avinguda Diagonal feels like ${v.pet} °C, ${v.dAbs} °C ${v.dWord} than without them. Blue on the ground shows where trees cool.`},
   {title:"Reflective roads",place:"paintBest",time:13,scenario:"paint",ref:"trees",layer:"dpet",surf:"none",view:"oblique",requires:"paint",
    disabledTip:"Coming with the new simulations",
    caption:v=>`${v.clock}: reflective road paint changes the feels-like temperature here by ${v.dSigned} °C compared with today's trees.`}
@@ -342,17 +356,18 @@ const PET_CLASSES=[[18,"Cool"],[23,"Comfortable"],[29,"Slightly warm"],[35,"Warm
 function petClass(v){for(const [e,n] of PET_CLASSES)if(v<e)return n;return "Very hot"}
 const HEAT=[[0,"#3b6fb6"],[.18,"#7fc6a4"],[.38,"#f6e27a"],[.6,"#f39c45"],[.82,"#d7301f"],[1,"#8f0a0a"]];
 const PED={
-  pet:{short:"PET at 1.1 m",chip:"PET",name:"Feels-like temperature (PET) at 1.1 m",unit:"°C",src:0,ch:0,q:"pet",lo:18,hi:50,stops:HEAT,classes:true},
-  tair:{short:"Air temp. 1.1 m",chip:"Air temperature",name:"Air temperature at 1.1 m",unit:"°C",src:0,ch:2,q:"tair",lo:22,hi:40,stops:HEAT},
-  tmrt:{short:"Tmrt 1.1 m",chip:"Radiant heat (Tmrt)",name:"Radiant heat (Tmrt) at 1.1 m",unit:"°C",src:0,ch:1,q:"tmrt",lo:20,hi:70,stops:HEAT},
-  wind:{short:"Wind 1.1 m",chip:"Wind",name:"Wind speed at 1.1 m",unit:"m/s",src:1,ch:0,q:"wind",lo:0,hi:4,stops:[[0,"#1f2a44"],[.35,"#2c6fa8"],[.7,"#3fb0c0"],[1,"#c9eec0"]]},
+  pet:{short:"PET at 1.1 m",chip:"PET",name:"Feels-like temperature (PET) at 1.1 m",plain:"Feels-like temperature",unit:"°C",src:0,ch:0,q:"pet",lo:18,hi:50,stops:HEAT,classes:true},
+  tair:{short:"Air temp. 1.1 m",chip:"Air temperature",name:"Air temperature at 1.1 m",plain:"Air temperature",unit:"°C",src:0,ch:2,q:"tair",lo:22,hi:40,stops:HEAT},
+  tmrt:{short:"Tmrt 1.1 m",chip:"Radiant heat (Tmrt)",name:"Radiant heat (Tmrt) at 1.1 m",plain:"Radiant heat",unit:"°C",src:0,ch:1,q:"tmrt",lo:20,hi:70,stops:HEAT},
+  wind:{short:"Wind 1.1 m",chip:"Wind",name:"Wind speed at 1.1 m",plain:"Wind speed",unit:"m/s",src:1,ch:0,q:"wind",lo:0,hi:4,stops:[[0,"#1f2a44"],[.35,"#2c6fa8"],[.7,"#3fb0c0"],[1,"#c9eec0"]]},
   rh:{short:"RH 1.1 m",chip:"Humidity",name:"Relative humidity at 1.1 m",unit:"%",src:1,ch:2,q:"rh",lo:30,hi:90,stops:[[0,"#fff5e0"],[.5,"#7fcdbb"],[1,"#225ea8"]]},
   sun:{short:"Sun at 1.1 m",chip:"Sun and shade",name:"Sun and shade at 1.1 m",unit:"",src:1,ch:1,q:"sun",lo:0,hi:1,stops:[[0,"#34405a"],[.15,"#5a6b8a"],[1,"#ffe9a8"]]},
-  dpet:{short:"PET change",chip:"PET change",name:"Feels-like temperature change",unit:"°C",src:0,ch:0,q:"pet",lo:-10,hi:10,diff:true,stops:[[0,"#2166ac"],[.35,"#92c5de"],[.5,"#f4f4f4"],[.65,"#f4a582"],[1,"#b2182b"]]}
+  dpet:{short:"Difference",chip:"Difference",name:"Difference in feels-like temperature, with trees minus without",unit:"°C",src:0,ch:0,q:"pet",lo:-15,hi:5,diff:true,   // white at 0; ends = 1st/99th percentile of 08-20 h (-14.8, +5.4)
+    stops:[[0,"#2166ac"],[.525,"#92c5de"],[.75,"#f4f4f4"],[.825,"#f4a582"],[1,"#b2182b"]]}
 };
 const SURF={
   none:{chip:"Photo",name:"",off:true,ch:0,q:"tsurf",lo:0,hi:1,stops:[[0,"#000000"],[1,"#ffffff"]]},
-  tsurf:{short:"Surface temp.",chip:"Surface temperature",name:"Surface temperature (ground, walls, roofs)",unit:"°C",ch:0,q:"tsurf",lo:20,hi:60,stops:HEAT,wall:"wallT"},
+  tsurf:{short:"Surface temp.",chip:"Surface temperature",name:"Surface temperature (ground, walls, roofs)",plain:"Surface temperature",unit:"°C",ch:0,q:"tsurf",lo:20,hi:60,stops:HEAT,wall:"wallT"},
   solar:{short:"Sunlight",chip:"Sunlight",name:"Sunlight on surfaces",unit:"W/m²",ch:1,q:"solar",lo:0,hi:900,stops:[[0,"#1b2033"],[.3,"#6a3d8f"],[.65,"#f08a3a"],[1,"#fff1b8"]],wall:"wallS"}
 };
 function hex(c){const n=parseInt(c.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255]}
@@ -465,17 +480,22 @@ void main(){
 }`);
 
 const TREE=prog(`#version 300 es
-in vec3 a_p; in vec3 a_n; in vec4 a_i; in float a_cb; uniform mat4 u_vp; uniform float u_part;
+in vec3 a_p; in vec3 a_n; in vec4 a_i; in float a_cb; uniform mat4 u_vp; uniform float u_part,u_limb;
 out vec3 w; out vec3 n; out vec3 lp; out float hv;
 float hash(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
 // crown: an ellipsoid with clumps at three scales, a flatter underside and a per-tree lean of the lumps
-float lump(vec3 q,float s){return 0.10*sin(q.x*3.1+s*31.0)*sin(q.y*2.7+s*17.0)*sin(q.z*2.3+s*11.0)
-  +0.07*sin(dot(q,vec3(6.1,5.3,4.7))+s*40.0)+0.04*sin(dot(q,vec3(11.0,13.0,9.0))+s*23.0);}
+float lump(vec3 q,float s){return 0.15*sin(q.x*2.6+s*31.0)*sin(q.y*2.3+s*17.0)*sin(q.z*2.0+s*11.0)
+  +0.08*sin(dot(q,vec3(5.1,4.3,3.9))+s*40.0)+0.04*sin(dot(q,vec3(11.0,13.0,9.0))+s*23.0);}   // plane tree: a broad dome of large leaf clumps
 void main(){ float h=a_i.z,r=a_i.w,cb=a_cb; vec3 p; hv=hash(a_i.xy); lp=a_p;
  if(u_part<0.5){ float a=max(0.5*(h-cb),0.5); vec3 q=a_p; if(q.z<0.0) q.z*=0.72;
    float j=1.0+lump(a_p,hv); vec3 s=vec3(r*(0.92+0.16*hv),r*(1.04-0.12*hv),a);
    p=vec3(a_i.xy,0.5*(h+cb)+0.12*a)+q*s*j; n=normalize(a_n/s); }
- else { float tr=0.07+0.010*h; float tp=1.0-0.35*clamp(a_p.z,0.0,1.0); p=vec3(a_i.xy,0.0)+vec3(a_p.xy*tr*tp,a_p.z*(cb+0.45*(h-cb))); n=a_n; }
+ else if(u_part<1.5){ float tr=0.13+0.015*h; float tp=1.0-0.25*clamp(a_p.z,0.0,1.0); p=vec3(a_i.xy,0.0)+vec3(a_p.xy*tr*tp,a_p.z*(0.8*cb+0.1)); n=a_n; }
+ else { // three limbs from the top of the bole up and out into the crown
+   float tr=0.13+0.015*h, ang=6.2832*(hv+u_limb/3.0), zf=0.8*cb+0.1;
+   vec3 s0=vec3(a_i.xy,zf), s1=vec3(a_i.xy+0.30*r*vec2(cos(ang),sin(ang)),cb+0.30*(h-cb));
+   vec3 dr=normalize(s1-s0), u=normalize(cross(dr,vec3(0,0,1))), v=cross(u,dr); float rad=tr*mix(0.70,0.40,clamp(a_p.z,0.0,1.0));
+   p=s0+(s1-s0)*a_p.z+(u*a_p.x+v*a_p.y)*rad; n=u*a_n.x+v*a_n.y; }
  w=p; gl_Position=u_vp*vec4(p,1.0);}`,
 `#version 300 es
 precision highp float; in vec3 w; in vec3 n; in vec3 lp; in float hv; out vec4 o; uniform float u_part;
@@ -490,12 +510,15 @@ void main(){ vec3 N=normalize(n);
    float c1=vn(w*0.55),c2=vn(w*1.7+17.0); vec3 Np=normalize(N+0.55*vec3(c1-0.5,c2-0.5,0.5*(c1+c2)-0.5));
    float dif=max(dot(Np,u_sun),0.0)*u_day; float back=pow(max(dot(-Np,u_sun),0.0),2.0)*0.25*u_day;
    float ao=mix(0.55,1.0,smoothstep(-0.9,0.7,lp.z))*mix(0.75,1.0,c1);
-   vec3 dark=mix(vec3(0.10,0.22,0.08),vec3(0.14,0.25,0.07),hv), lite=mix(vec3(0.30,0.46,0.16),vec3(0.42,0.54,0.20),hv);
+   vec3 dark=mix(vec3(0.13,0.26,0.08),vec3(0.17,0.29,0.08),hv), lite=mix(vec3(0.44,0.58,0.21),vec3(0.54,0.65,0.25),hv);   // fresh mid-green plane-tree foliage
    vec3 alb=mix(dark,lite,clamp(0.25+0.9*c2*c1+0.3*Np.z,0.0,1.0));
    float amb=(0.25+0.30*u_day)*(0.8+0.2*Np.z);
    o=vec4(fogit(alb*(amb*ao+0.9*dif*ao)+vec3(0.20,0.30,0.05)*back,w),1.0);
  } else {
-   float b=vn(vec3(w.xy*4.0,w.z*0.6)); vec3 alb=mix(vec3(0.24,0.19,0.14),vec3(0.42,0.36,0.28),b);
+   // plane-tree bark: flaking patches of olive, tan, sage and cream
+   float m=0.65*vn(vec3(w.xy*7.0,w.z*2.2)+hv*13.0)+0.35*vn(vec3(w.xy*3.0,w.z*1.1)+31.0);
+   vec3 alb=mix(vec3(0.40,0.40,0.29),vec3(0.55,0.47,0.35),smoothstep(0.34,0.40,m));
+   alb=mix(alb,vec3(0.60,0.62,0.49),smoothstep(0.47,0.53,m)); alb=mix(alb,vec3(0.82,0.80,0.66),smoothstep(0.58,0.64,m));
    float dif=max(dot(N,u_sun),0.0)*u_day; float amb=(0.25+0.30*u_day)*(0.8+0.2*N.z);
    o=vec4(fogit(alb*(amb+0.9*dif),w),1.0); }}`);
 
@@ -506,7 +529,7 @@ const S={man:null,scen:0,ref:0,ped:{on:true,layer:"pet",alpha:.85},surf:"tsurf",
 let lutP,lutS,stTex,phTex,blankTex;
 const cache=new Map(),CACHE_MAX=40;
 async function frame(sk,kind,i){const k=sk+"|"+kind+"|"+i;if(cache.has(k)){const e=cache.get(k);cache.delete(k);cache.set(k,e);return e}
-  const F=EXPO.frames[sk],arr=kind==="A"?F.imgA:(kind==="B"?F.imgB:F.imgC);
+  const F=EXPO.frames[sk],arr=kind==="A"?F.imgA:(kind==="B"?F.imgB:(kind==="D"?F.imgD:F.imgC));
   const id=await decodeImage(arr[i]);const e={data:id.data,tex:tex(id.width,id.height,id.data,{mip:true})};cache.set(k,e);
   while(cache.size>CACHE_MAX){const [ok,ov]=cache.entries().next().value;gl.deleteTexture(ov.tex);cache.delete(ok)}return e}
 const keyOf=i=>S.man.scenarios[i].key;
@@ -515,10 +538,10 @@ const shortName=s=>SCEN_SHORT[s.key]||s.label, cmpName=s=>SCEN_CMP[s.key]||s.lab
 
 // ============================================================================ geometry
 let vaoB,nIdxB,vaoT,vaoTr,nT,crownN,trunkN,bufT0,bufT1,nVerts,nWall,vaoG,vaoP,vaoS;const wallData={};
-function icosphere(){const t=(1+Math.sqrt(5))/2;let v=[[-1,t,0],[1,t,0],[-1,-t,0],[1,-t,0],[0,-1,t],[0,1,t],[0,-1,-t],[0,1,-t],[t,0,-1],[t,0,1],[-t,0,-1],[-t,0,1]].map(norm);
+function icosphere(sub=2){const t=(1+Math.sqrt(5))/2;let v=[[-1,t,0],[1,t,0],[-1,-t,0],[1,-t,0],[0,-1,t],[0,1,t],[0,-1,-t],[0,1,-t],[t,0,-1],[t,0,1],[-t,0,-1],[-t,0,1]].map(norm);
   const f=[[0,11,5],[0,5,1],[0,1,7],[0,7,10],[0,10,11],[1,5,9],[5,11,4],[11,10,2],[10,7,6],[7,1,8],[3,9,4],[3,4,2],[3,2,6],[3,6,8],[3,8,9],[4,9,5],[2,4,11],[6,2,10],[8,6,7],[9,8,1]];
   const mid={},m=(a,b)=>{const k=a<b?a+"_"+b:b+"_"+a;if(mid[k]===undefined){mid[k]=v.length;v.push(norm([(v[a][0]+v[b][0])/2,(v[a][1]+v[b][1])/2,(v[a][2]+v[b][2])/2]))}return mid[k]};
-  let F=f;for(let it=0;it<2;it++){const f2=[];for(const [a,b,c] of F){const ab=m(a,b),bc=m(b,c),ca=m(c,a);f2.push([a,ab,ca],[b,bc,ab],[c,ca,bc],[ab,bc,ca])}F=f2}
+  let F=f;for(let it=0;it<sub;it++){const f2=[];for(const [a,b,c] of F){const ab=m(a,b),bc=m(b,c),ca=m(c,a);f2.push([a,ab,ca],[b,bc,ab],[c,ca,bc],[ab,bc,ca])}F=f2}
   const P=[],I=[];for(const p of v)P.push(...p,...p);for(const t3 of F)I.push(...t3);return {P:new Float32Array(P),I:new Uint16Array(I)}}
 function prism(){const P=[],I=[],n=6;for(let k=0;k<=n;k++){const a=k/n*2*Math.PI,c=Math.cos(a),s=Math.sin(a);P.push(c,s,0,c,s,0,c,s,1,c,s,0)}
   for(let k=0;k<n;k++){const a=2*k,b=2*k+1,c=2*k+2,d=2*k+3;I.push(a,c,b,b,c,d)}return {P:new Float32Array(P),I:new Uint16Array(I)}}
@@ -578,10 +601,12 @@ async function updateFrames(){
   const nT=S.man.times.length,tf=clamp(S.tf,0,nT-1),i0=Math.floor(tf),i1=Math.min(i0+1,nT-1),w=tf-i0;
   const st=S.man.surfTimes||S.man.times,[j0,j1,sw]=bracketT(st,timeHour());
   const sk=keyOf(S.scen),rk=keyOf(S.ref),tok=++cur.token;
-  const need=[frame(sk,"A",i0),frame(sk,"A",i1),frame(sk,"B",i0),frame(sk,"B",i1),frame(rk,"A",i0),frame(rk,"A",i1),frame(sk,"C",j0),frame(sk,"C",j1)];
+  const Ld=PED[S.ped.layer],useD=S.ped.on&&!!Ld&&!!Ld.diff&&!!EXPO.frames[sk].imgD&&!!EXPO.frames[rk].imgD;   // tree effect: averaged PET (image D)
+  const need=[frame(sk,"A",i0),frame(sk,"A",i1),frame(sk,"B",i0),frame(sk,"B",i1),frame(rk,useD?"D":"A",i0),frame(rk,useD?"D":"A",i1),frame(sk,"C",j0),frame(sk,"C",j1)];
+  if(useD)need.push(frame(sk,"D",i0),frame(sk,"D",i1),frame(rk,"A",i0),frame(rk,"A",i1));
   for(const k of S.man.scenarios.map(s=>s.key).filter(k=>k!==sk&&k!==rk))need.push(frame(k,"A",i0),frame(k,"A",i1));
   const r=await Promise.all(need);if(tok!==cur.token)return;
-  Object.assign(cur,{i0,i1,w,j0,j1,sw,A0:r[0],A1:r[1],B0:r[2],B1:r[3],R0:r[4],R1:r[5],C0:r[6],C1:r[7],ready:true});
+  Object.assign(cur,{i0,i1,w,j0,j1,sw,A0:r[0],A1:r[1],B0:r[2],B1:r[3],R0:r[4],R1:r[5],C0:r[6],C1:r[7],D0:useD?r[8]:null,D1:useD?r[9]:null,ready:true});
   uploadWalls();
   if(i1+1<nT){frame(sk,"A",i1+1);frame(sk,"B",i1+1)}
   drawMiniBase();updateCard();drawLegend();S.dirty=true}
@@ -590,6 +615,7 @@ function uploadWalls(){if(!cur.ready)return;const L=SURF[S.surf];if(L.off)return
   gl.bindBuffer(gl.ARRAY_BUFFER,bufT1);gl.bufferSubData(gl.ARRAY_BUFFER,0,d.subarray(cur.j1*nWall,(cur.j1+1)*nWall))}
 function srcNote(kind){if(!cur.ready)return "";const F=EXPO.frames[keyOf(S.scen)],t=fmtClock(timeHour());
   if(kind==="ped"){const ps=[...new Set([...(F.pedSrc?F.pedSrc[cur.i0]:[]),...(F.pedSrc&&cur.w>1e-3?F.pedSrc[cur.i1]:[])])].sort();
+    const L=PED[S.ped.layer];if(L&&L.diff&&cur.D0)return `${t} · averaged over 30 minutes either side`;
     return ps.length?`${t} · from CFD exports ${ps.join(", ")}`:""}
   const ss=[...new Set([...(F.surfSrc?F.surfSrc[cur.j0]:[]),...(F.surfSrc&&cur.sw>1e-3?F.surfSrc[cur.j1]:[])])].sort();
   return ss.length?`${t} · from CFD surface exports ${ss.join(", ")}`+(S.surf==="solar"?roofNote():""):""}
@@ -616,6 +642,17 @@ function clampMap(){const m=S.map,g=S.man.grid;m.dist=clamp(m.dist,40,4500);m.pi
   m.tx=clamp(m.tx,g.x0-800,g.x1+800);m.ty=clamp(m.ty,g.y0-800,g.y1+800)}
 function zoomMapAt(cx,cy,f){const m=S.map,p=(cx===null?null:groundAt(cx,cy))||[m.tx,m.ty];const nd=clamp(m.dist*f,40,4500),ff=nd/m.dist;
   m.tx=p[0]+(m.tx-p[0])*ff;m.ty=p[1]+(m.ty-p[1])*ff;m.dist=nd;clampMap();S.dirty=true}
+// rotate/tilt drag (Ctrl or right button): turn and tilt the camera about the screen centre so the ground point
+// grabbed at the start of the drag stays under the pointer (damped Gauss-Newton on heading and tilt)
+function rotGrab(d,x,y){const m=S.map;
+  if(!d.g){m.head=wrap360(m.head-(x-d.x)*0.3);m.pitch=clamp(m.pitch+(y-d.y)*0.25,20,89);return}   // grabbed the sky: plain turn
+  const P=d.g,err=()=>{const s=project(P[0],P[1],0);return s?[s[0]-x,s[1]-y]:null};
+  for(let it=0;it<4;it++){const e0=err();if(!e0||Math.hypot(e0[0],e0[1])<0.5)break;
+    const h0=m.head,p0=m.pitch;m.head=h0+0.5;const eh=err();m.head=h0;m.pitch=p0+0.5;const ep=err();m.pitch=p0;if(!eh||!ep)break;
+    const j00=(eh[0]-e0[0])/0.5,j10=(eh[1]-e0[1])/0.5,j01=(ep[0]-e0[0])/0.5,j11=(ep[1]-e0[1])/0.5;
+    const lam=1e-3*(j00*j00+j10*j10+j01*j01+j11*j11)+1e-6,a=j00*j00+j10*j10+lam,b=j00*j01+j10*j11,c=j01*j01+j11*j11+lam;
+    const g0=-(j00*e0[0]+j10*e0[1]),g1=-(j01*e0[0]+j11*e0[1]),det=a*c-b*b;if(Math.abs(det)<1e-12)break;
+    m.head=wrap360(h0+clamp((c*g0-b*g1)/det,-15,15));m.pitch=clamp(p0+clamp((a*g1-b*g0)/det,-10,10),20,89)}}
 function panMap(x0,y0,x1,y1){const a=groundAt(x0,y0),b=groundAt(x1,y1);if(!a||!b)return;S.map.tx+=a[0]-b[0];S.map.ty+=a[1]-b[1];clampMap();S.dirty=true}
 function bestHeading(x,y){let best=0,bd=-1;for(let k=0;k<72;k++){const a=k*5*Math.PI/180;let d=0;for(;d<300;d+=2){if(!isOutdoor(x+Math.sin(a)*d,y+Math.cos(a)*d))break}if(d>bd){bd=d;best=k*5}}return best}
 function nearestOutdoor(x,y){if(isOutdoor(x,y))return[x,y];for(let r=2;r<80;r+=2)for(let k=0;k<24;k++){const a=k/24*2*Math.PI,px=x+Math.cos(a)*r,py=y+Math.sin(a)*r;if(isOutdoor(px,py))return[px,py]}return[x,y]}
@@ -643,7 +680,7 @@ const isPhone=()=>document.body.classList.contains("phone");
 function setDevice(){document.body.classList.toggle("phone",PHONE_MQ.matches);
   document.body.classList.toggle("touch",matchMedia("(pointer:coarse)").matches||(navigator.maxTouchPoints>0&&!matchMedia("(any-pointer:fine)").matches))}   // touch-only devices: hide +/-
 setDevice();
-function layout(){const br=$("bottom").getBoundingClientRect(),b=innerHeight-br.top+8,ph=isPhone();
+function layout(){if(typeof filmCapPos==="function")filmCapPos();const br=$("bottom").getBoundingClientRect(),b=innerHeight-br.top+8,ph=isPhone();
   const lp0=ph?0:$("card").getBoundingClientRect().right,tp0=ph?$("card").getBoundingClientRect().bottom:0,bp0=innerHeight-br.top;
   if(lp0!==S.leftPad||tp0!==S.topPad||bp0!==S.botPad){S.leftPad=lp0;S.topPad=tp0;S.botPad=bp0;S.dirty=true}
   let up=b;   // bottom offset for the floating buttons
@@ -652,14 +689,14 @@ function layout(){const br=$("bottom").getBoundingClientRect(),b=innerHeight-br.
   $("layersBtn").style.bottom=up+"px";$("layersPop").style.bottom=ph?(b-4)+"px":(b+72)+"px";$("navbox").style.bottom=up+"px";$("walkpad").style.bottom=b+"px";
   $("mini").style.bottom=(up+(ph?60:72))+"px";$("mini").style.visibility=(ph&&sheet)?"hidden":"visible";$("help").style.bottom=up+"px";
   const cb=$("card").getBoundingClientRect();
-  if(ph){$("tourBar").style.top=(cb.bottom+6)+"px";const mp=$("menuPop");mp.style.top=(cb.bottom+4)+"px";mp.style.right="6px";ic.style.maxHeight="";
+  if(ph){$("tourBar").style.top=document.body.classList.contains("film")?"auto":(cb.bottom+6)+"px";const mp=$("menuPop");mp.style.top=(cb.bottom+4)+"px";mp.style.right="6px";ic.style.maxHeight="";
     // short screens (landscape): hide floating buttons that no longer fit between the top bar and a sheet
     const room=innerHeight-up-cb.bottom-8;$("navbox").style.visibility=$("navbox").offsetHeight>room?"hidden":"visible";
     $("layersBtn").style.visibility=$("layersBtn").offsetHeight>room?"hidden":"visible"}
-  else{$("navbox").style.visibility="visible";$("layersBtn").style.visibility="visible";$("tourBar").style.top="";
+  else{$("navbox").style.visibility="visible";$("layersBtn").style.visibility="visible";$("tourBar").style.top=document.body.classList.contains("film")?"auto":"";
     // keep the info card clear of the nav cluster (bottom right)
     const top=cb.bottom+8;ic.style.top=top+"px";ic.style.maxHeight=Math.max(140,br.top-top-8)+"px"}
-  for(const b2 of $("scen").children)if(b2.dataset.key)b2.querySelector(".sh").textContent=SCEN_PHONE[b2.dataset.key]||b2.querySelector(".lg").textContent}
+  }
 if(window.ResizeObserver){const ro=new ResizeObserver(()=>layout());for(const id of ["bottom","card","infoCard","layersPop"])ro.observe(document.getElementById(id))}
 PHONE_MQ.addEventListener&&PHONE_MQ.addEventListener("change",()=>{setDevice();layout();S.dirty=true});
 addEventListener("resize",()=>{setDevice();layout()});
@@ -670,7 +707,7 @@ function swipeClose(el,close){let y0=null,dy=0;
   el.addEventListener("pointermove",e=>{if(y0===null)return;dy=Math.max(0,e.clientY-y0);el.style.transform=`translateY(${dy}px)`});
   const end=()=>{if(y0===null)return;el.style.transform="";y0=null;if(dy>60)close()};el.addEventListener("pointerup",end);el.addEventListener("pointercancel",end)}
 function buildUI(){
-  const sc=$("scen");sc.innerHTML="";S.man.scenarios.forEach((s,i)=>{const b=document.createElement("button");b.dataset.key=s.key;b.innerHTML=`<span class="lg">${shortName(s)}</span><span class="sh">${SCEN_PHONE[s.key]||shortName(s)}</span>`;b.title=s.label;b.onclick=()=>{S.scen=i;refreshScen()};sc.appendChild(b)});
+  const sc=$("scen");sc.innerHTML="";S.man.scenarios.forEach((s,i)=>{const b=document.createElement("button");b.dataset.key=s.key;b.innerHTML=SCEN_ICON[s.key]||`<span>${shortName(s)}</span>`;b.title=cmpName(s);b.setAttribute("aria-label",cmpName(s));b.onclick=()=>{if(S.ped.on&&S.ped.layer==="dpet")leaveDelta();S.scen=i;refreshScen()};sc.appendChild(b)});
   const gt=$("goto");for(const p of S.man.presets){const o=document.createElement("option");o.value="p"+S.man.presets.indexOf(p);o.textContent=p.name;gt.appendChild(o)}
   const ow=document.createElement("option");ow.value="whole";ow.textContent="Whole superblock";gt.appendChild(ow);
   gt.onchange=()=>{const v=gt.value;gt.value="";if(v==="whole"){flyTo({mode:"map",tx:(S.man.grid.x0+S.man.grid.x1)/2,ty:(S.man.grid.y0+S.man.grid.y1)/2,dist:1500,head:15,pitch:55});return}
@@ -682,7 +719,11 @@ function buildUI(){
     b.onclick=()=>{if(k==="surface"){S.ped.on=false;S.surf="tsurf";uploadWalls()}else{S.ped.on=true;S.ped.layer=k}refreshLayers()};return b};
   const top=document.createElement("div");top.className="vtop";
   top.appendChild(mk("pet","vbig",IC.pet+"<span>Feels-like temperature</span><small>PET</small>","Feels-like temperature (PET) at 1.1 m: how hot the street feels"));
-  if(S.man.scenarios.length>1)top.appendChild(mk("dpet","vdelta","&Delta;<span> change</span>","Change of the feels-like temperature against the comparison scenario"));
+  if(S.man.scenarios.length>1){const db=document.createElement("button");db.id="dBtn";db.dataset.diff="1";db.textContent="Difference";
+    db.title="Difference in feels-like temperature: with the existing trees minus without trees";db.setAttribute("aria-label",db.title);
+    db.onclick=()=>{if(S.ped.on&&S.ped.layer==="dpet")return;S.prevLayer=S.ped.on?S.ped.layer:"surface";S.ped.on=true;S.ped.layer="dpet";
+      const ti=roleIndex("trees"),bi=roleIndex("base");if(ti>=0&&bi>=0){S.scen=ti;S.ref=bi}refreshLayers();refreshScen()};$("scen").appendChild(db)}
+  {const fb=document.createElement("button");fb.className="chip";fb.id="filmBtn";fb.innerHTML="&#9654; Tour";fb.title="Play the 1-minute tour on a loop (the same as the video); Stop, Esc or a touch on the map ends it";fb.onclick=playFilm;$("scenRow").appendChild(fb)}
   cp.appendChild(top);
   const sub=document.createElement("div");sub.className="vsub";
   for(const [k,t,ti] of [["tair","Air","Air temperature at 1.1 m"],["rh","Humidity","Relative humidity at 1.1 m"],["tmrt","Radiation","Radiant heat (Tmrt): sun and warm surfaces"],["wind","Wind","Wind at 1.1 m (moving streaks show the direction)"]]){
@@ -698,7 +739,7 @@ function buildUI(){
   swipeClose($("infoCard"),()=>$("infoX").click());swipeClose($("layersPop"),()=>setLayers(false));
   // tour
   const tb=$("tourBtns");TOUR.forEach((st,i)=>{const b=document.createElement("button");b.className="btn";b.innerHTML=`<span class="n">${i+1}</span><span class="lg">${st.title}</span><span class="sh">${st.short||TOUR_SHORT[i]||st.title}</span>`;
-    const ok=!st.requires||roleIndex(st.requires)>=0;b.disabled=!ok;if(!ok)b.title=st.disabledTip||"";b.onclick=()=>runTour(i);tb.appendChild(b)});
+    const ok=!st.requires||roleIndex(st.requires)>=0;if(!ok)return;b.onclick=()=>runTour(i);tb.appendChild(b)});   // steps whose scenario is not in the data are not shown
   for(const b of $("modeSeg").children)b.onclick=()=>setUI(b.dataset.mode);
   $("time").max=S.man.times.length-1;$("time").oninput=e=>{S.tf=+e.target.value;onTime()};
   $("play").onclick=togglePlay;
@@ -710,7 +751,7 @@ function buildUI(){
   for(const id of ["padF","padB"]){const el=$(id),k=id==="padF"?"KeyW":"KeyS";el.onpointerdown=e=>{S.keys[k]=true;el.setPointerCapture(e.pointerId)};el.onpointerup=el.onpointercancel=()=>{S.keys[k]=false}}
   setupPeg();
   const m=S.man;
-  $("tech").innerHTML=`Model: computational fluid dynamics (Ansys Fluent) for ${m.simDate}, using the earlier coarse-mesh runs of the published SAUC 2026 study (prototype). Feels-like temperature is PET for a standing adult (Höppe reference person). `+
+  $("tech").innerHTML=`Model: computational fluid dynamics (Ansys Fluent) for ${m.simDate}, October 2026 runs on the coarse mesh (2.1 million cells) of the model published in Yamada et al. 2026. Feels-like temperature is PET for a standing adult (Höppe reference person). `+
    (m.tmrtMode==="geometric"?"Sun and tree shade on people are computed from the building and tree geometry; air temperature, humidity and wind come from the CFD. In these runs the trees do not shade the CFD surfaces, so the surface layers look almost the same with and without trees. ":"Radiant heat is taken from the CFD radiation field. ")+
    `Surface sunlight field: ${m.solarField||"none"}. Ground grid ${m.grid.cell} m. Data built ${m.built}.`;
   if(store.get("expoHelpSeen")!=="1")showHelp(true);
@@ -721,11 +762,15 @@ function setUI(mode){S.ui=mode;document.body.classList.toggle("tour",mode==="tou
   layout();if(t&&S.layersOpen)setLayers(false);if(!t){S.tourStep=-1;$("caption").style.display="none";[...$("tourBtns").children].forEach(b=>b.classList.remove("on"));if(S.ref!==0){S.ref=0;if(S.man)updateFrames()}}
   setModeUI()}
 function zoomBtn(f){if(S.mode==="map"){const r=cv.getBoundingClientRect();zoomMapAt(r.left+r.width/2,r.top+r.height/2,f)}else{S.fov=clamp(S.fov*f,25,100);S.dirty=true}}
-function refreshScen(){[...$("scen").children].forEach((b,i)=>b.classList.toggle("on",i===S.scen));return updateFrames()}
+function leaveDelta(){const p=S.prevLayer||"pet";if(p==="surface"){S.ped.on=false;S.surf="tsurf";uploadWalls()}else{S.ped.on=true;S.ped.layer=p}refreshLayers();updateFrames()}
+function markScen(){const dOn=S.ped.on&&S.ped.layer==="dpet";[...$("scen").children].forEach((b,i)=>b.classList.toggle("on",b.dataset.diff?dOn:(!dOn&&i===S.scen)))}
+function refreshScen(){markScen();return updateFrames()}
 function refreshLayers(){const P=PED[S.ped.layer],L=SURF[S.surf];
   gl.bindTexture(gl.TEXTURE_2D,lutP);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,256,1,0,gl.RGBA,gl.UNSIGNED_BYTE,buildLUT(P.stops));
   gl.bindTexture(gl.TEXTURE_2D,lutS);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,256,1,0,gl.RGBA,gl.UNSIGNED_BYTE,buildLUT(L.stops));
-  for(const b of $("chipsPed").querySelectorAll(".chip"))b.classList.toggle("on",b.dataset.ped==="surface"?!S.ped.on:(S.ped.on&&b.dataset.ped===S.ped.layer));
+  const dOn=S.ped.on&&S.ped.layer==="dpet";
+  for(const b of $("chipsPed").querySelectorAll(".chip")){b.classList.toggle("on",!dOn&&(b.dataset.ped==="surface"?!S.ped.on:(S.ped.on&&b.dataset.ped===S.ped.layer)));b.disabled=dOn}
+  markScen();
   $("opRow").style.opacity=S.ped.on?1:.4;$("pedAlpha").disabled=!S.ped.on;
   drawLegend();drawMiniBase();updateCard();S.dirty=true}
 function onTime(){$("time").value=S.tf;$("clock").firstChild.nodeValue=fmtClock(timeHour());const s=sunNow();
@@ -735,13 +780,13 @@ let playAcc=0;function togglePlay(){S.play=!S.play;$("play").innerHTML=S.play?"&
 // one legend: the layer that colours the view (1.1 m sheet if on, else the surface layer)
 function activeLayer(){if(S.ped.on)return {L:PED[S.ped.layer],kind:"ped"};if(!SURF[S.surf].off)return {L:SURF[S.surf],kind:"surf"};return null}
 function drawLegend(){const a=activeLayer(),lg=$("legend");if(!a){lg.style.display="none";return}lg.style.display="flex";const L=a.L,lut=buildLUT(L.stops);
-  const name=L.diff?`PET change vs. ${shortName(S.man.scenarios[S.ref]).replace(/^\+ /,"").toLowerCase()}`:(L===SURF.solar&&S.man.solarLabel?S.man.solarLabel:L.name);
-  $("legT").textContent=(isPhone()&&L.short?(L.diff?L.short+" vs. "+shortName(S.man.scenarios[S.ref]).replace(/^\+ /,"").toLowerCase():L.short):name)+(L.unit?` (${L.unit})`:"");
+  const film=document.body.classList.contains("film"),name=film&&L.plain?L.plain:(L===SURF.solar&&S.man.solarLabel?S.man.solarLabel:L.name);
+  $("legT").textContent=(isPhone()&&L.short&&!film?L.short:name)+(L.unit?` (${L.unit})`:"");
   const c=$("legcv"),x=c.getContext("2d");for(let i=0;i<c.width;i++){const k=Math.round(i/(c.width-1)*255)*4;x.fillStyle=`rgb(${lut[k]},${lut[k+1]},${lut[k+2]})`;x.fillRect(i,0,1,c.height)}
   const tk=$("legTicks");tk.innerHTML="";const ticks=L.classes?[18,23,29,35,41,Math.round(L.hi)]:(L.q==="sun"?[0,1]:[0,.25,.5,.75,1].map(f=>lerp(L.lo,L.hi,f)));
   for(const v of ticks){const sp=document.createElement("span");sp.style.left=clamp((v-L.lo)/(L.hi-L.lo),0,1)*100+"%";if(v===L.lo)sp.style.transform="none";if(v===L.hi)sp.style.transform="translateX(-100%)";
     sp.textContent=L.q==="sun"?(v?"full sun":"shade"):(L.diff&&v>0?"+":"")+(L.q==="wind"?v.toFixed(1):Math.round(v));tk.appendChild(sp)}
-  $("legCls").textContent=L.classes?"comfortable 18–23 · slightly warm 23–29 · warm 29–35 · hot 35–41 · very hot >41":(L.diff?"blue = cooler · red = hotter":"");
+  $("legCls").textContent=L.classes?"comfortable 18–23 · slightly warm 23–29 · warm 29–35 · hot 35–41 · very hot >41":(L.diff?"blue: cooler with the trees, red: warmer with the trees":"");
   $("legSrc").textContent=srcNote(a.kind)}
 function _unusedLegend2(){const B=SURF[S.surf];
   $("leg2T").textContent=(isPhone()?"Buildings":"Walls and roofs: "+(B===SURF.solar&&S.man.solarLabel?S.man.solarLabel:B.short||B.name).toLowerCase())+(B.unit?` (${B.unit})`:"");
@@ -815,7 +860,7 @@ const mini=$("minicv"),mctx=mini.getContext("2d"),mbase=document.createElement("
 function drawMiniBase(){if(!cur.ready||!S.staticData)return;const g=S.man.grid,W=Math.round(g.nx/3),H=Math.round(g.ny/3);mbase.width=W;mbase.height=H;
   const c=mbase.getContext("2d"),im=c.createImageData(W,H),st=S.staticData,a=activeLayer()||{L:PED.pet,kind:"ped"},usePed=a.kind==="ped";
   const L=a.L,lut=buildLUT(L.stops),q=S.man.q[L.q];
-  const src=usePed?(L.src===0?[cur.A0.data,cur.A1.data]:[cur.B0.data,cur.B1.data]):[cur.C0.data,cur.C1.data],w=usePed?cur.w:cur.sw,R=[cur.R0.data,cur.R1.data];
+  const src=usePed?(L.diff&&cur.D0?[cur.D0.data,cur.D1.data]:(L.src===0?[cur.A0.data,cur.A1.data]:[cur.B0.data,cur.B1.data])):[cur.C0.data,cur.C1.data],w=usePed?cur.w:cur.sw,R=[cur.R0.data,cur.R1.data];
   for(let r=0;r<H;r++)for(let cc=0;cc<W;cc++){const k=(r*3)*g.nx+cc*3,o=(r*W+cc)*4;
     if(st[k*4+1]<128&&usePed){const v=110+Math.min(st[k*4],60)*1.6;im.data[o]=im.data[o+1]=im.data[o+2]=v;im.data[o+3]=255;continue}
     let v;if(L.diff)v=(lerp(src[0][k*4],src[1][k*4],w)-lerp(R[0][k*4],R[1][k*4],w))/255*(q[1]-q[0]);else v=q[0]+lerp(src[0][k*4+L.ch],src[1][k*4+L.ch],w)/255*(q[1]-q[0]);
@@ -854,17 +899,74 @@ async function runTour(i){const st=TOUR[i];if(st.requires&&roleIndex(st.requires
   if(s){v.pet=Math.round(s.pet);v.cls=petClass(s.pet);const r=petOf(keyOf(S.ref),s.k);if(r!==null){const d=s.pet-r;v.dAbs=Math.abs(Math.round(d));v.dWord=d<0?"cooler":"hotter";v.dSigned=(d>0?"+":"")+Math.round(d);v.ref=Math.round(r)}}
   $("caption").textContent=st.caption(v);S.dirty=true;return v}
 
+// ============================================================================ 1-minute tour (film)
+// filmState(t) gives the whole view at film time t (s); the Tour button plays it live, scripts/make_video.py records it frame by frame
+const FILM={T:60,on:false,scene:-1,head:70,walk0:[1109.1,642.6]};   // 25 m walk ENE along Av. Diagonal: under crowns all the way, >= 1.6 m from any trunk (searched 2026-10-19)
+const filmEase=f=>0.5-0.5*Math.cos(Math.PI*clamp(f,0,1));
+function tfAt(hr){const T=S.man.times;if(hr<=T[0])return 0;for(let i=0;i<T.length-1;i++)if(hr<=T[i+1])return i+(hr-T[i])/(T[i+1]-T[i]);return T.length-1}
+function filmState(t){const H=FILM.head,a=H*Math.PI/180,ux=Math.sin(a),uy=Math.cos(a),W=FILM.walk0,at=d=>[W[0]+ux*d,W[1]+uy*d],D={x:at(25)[0],y:at(25)[1]},L=lerp,E=filmEase;
+  const O={tx:830,ty:760,dist:1500,head:15,pitch:55},Cc={tx:840,ty:775},lg=Math.log,ph=(t0,t1)=>clamp((t-t0)/(t1-t0),0,1),tr="trees";
+  const orb=(f,h0,h1,d0,d1,p0,p1,c0,c1)=>({tx:L(c0.tx,c1.tx,E(f)),ty:L(c0.ty,c1.ty,E(f)),dist:Math.exp(L(lg(d0),lg(d1),E(f))),head:angLerp(h0,h1,f),pitch:L(p0,p1,E(f))}),Dm={tx:D.x,ty:D.y};
+  if(t<7){const f=t/7;return {sc:0,mode:"map",scen:tr,layer:"pet",h:L(6,15.5,f),map:{...O,head:L(15,35,f)}}}                   // the day heats up
+  if(t<9){const f=E(ph(7,9)),q=at(15);return {sc:1,mode:"map",scen:tr,layer:"pet",h:15.5,                                        // over the Diagonal, high up
+    map:{tx:L(O.tx,q[0],f),ty:L(O.ty,q[1],f),dist:Math.exp(L(lg(1500),lg(300),f)),head:angLerp(35,H,f),pitch:L(55,75,f)}}}
+  if(t<11){const f=E(ph(9,11)),q=at(15);return {sc:1,mode:"map",scen:tr,layer:"pet",h:15.5,                                      // down along the avenue
+    map:{tx:q[0],ty:q[1],dist:Math.exp(L(lg(300),lg(60),f)),head:H,pitch:L(75,28,f)}}}   // ends ~28 m up, above the crowns
+  if(t<19)return {sc:2,mode:"walk",scen:tr,layer:"pet",h:15.5,pos:at((t-11)*25/8),head:H,pitch:-6};                              // walk under the plane trees
+  if(t<26){const f=ph(19,26);return {sc:3,mode:"walk",scen:t<21?tr:"base",layer:"pet",h:15.5,pos:at(25),head:H+18*Math.sin(f*Math.PI),pitch:-6}}   // the trees go
+  if(t<33)return {sc:4,mode:"map",scen:tr,layer:"dpet",h:L(15.5,16,ph(26,33)),map:orb(ph(26,31),H,H+30,40,420,18,50,Dm,Dm)};     // tree effect from above
+  if(t<39)return {sc:5,mode:"map",scen:tr,layer:"tmrt",h:L(16,16.5,ph(33,39)),map:orb(ph(33,39),H+30,H+55,420,420,50,50,Dm,Dm)};   // radiant heat
+  if(t<45)return {sc:6,mode:"map",scen:tr,layer:"tair",h:L(16.5,17,ph(39,45)),map:orb(ph(39,45),H+55,H+80,420,520,50,50,Dm,Dm)};   // air temperature
+  if(t<51)return {sc:7,mode:"map",scen:tr,layer:"wind",h:L(17,18,ph(45,51)),map:orb(ph(45,51),H+80,H+100,520,800,50,52,Dm,Cc)};    // wind
+  if(t<56)return {sc:8,mode:"map",scen:tr,layer:"surface",h:L(18,20.5,ph(51,56)),map:orb(ph(51,56),H+100,H+130,800,900,52,54,Cc,Cc)};   // surfaces in the evening (inside the open edge)
+  return {sc:9,mode:"map",scen:tr,layer:"pet",h:L(20.5,22,ph(56,60)),map:orb(ph(56,59.5),H+130,O.head+360,900,1500,54,55,Cc,O)}}   // back to the feels-like temperature, into the night
+const FILM_CAP=[
+  v=>"July 30, 2026, a clear summer day in the Poblenou superblock, Barcelona. The colors show how hot the street feels.",
+  v=>"Avinguda Diagonal at 3:30 p.m., the hottest time of the day",
+  v=>"Walking under the plane trees of the Diagonal",
+  v=>v.pT===null?"Now the trees are taken away":`Here, with the trees: ${v.pT} °C. Without them: ${v.pB} °C.`,
+  v=>"The difference with and without trees: blue is cooler with the trees, red is warmer where the crowns slow the breeze",
+  v=>"Radiant heat from the sun and from hot surfaces. In the sun it is far above the air temperature; tree shade cuts it sharply.",
+  v=>"Air temperature changes much less between sun and shade than the feels-like temperature does",
+  v=>"Wind: the sea breeze flows through the street grid, and buildings and trees slow it down",
+  v=>v.g===null?"Surface temperature of pavement, walls and roofs":`Surface temperature: in the evening the pavement and the roofs stay warmer than the air (at 8 p.m., ground ${v.g} °C, air ${v.a} °C)`,
+  v=>v.p===null?"How hot the street feels, into the night":`How hot the street feels, into the night: about ${v.p} °C on average across the superblock at 10 p.m.`];
+function filmVals(st){if(st.sc===9){const c=S.man.curves[keyOf(roleIndex("trees"))],i=S.man.times.indexOf(22);return {p:i<0?null:Math.round(c.pet_mean[i])}}
+  if(st.layer==="surface"){const c=S.man.curves[keyOf(roleIndex("trees"))],i=S.man.times.indexOf(20),j=(c.surf_t||[]).indexOf(20);
+    return {g:j<0?null:Math.round(c.tsurf_ground[j]),a:i<0?null:Math.round(c.tair_mean[i])}}
+  if(!st.pos)return {};const k=cellIndex(st.pos[0],st.pos[1]),tk=keyOf(roleIndex("trees")),bk=keyOf(roleIndex("base")),pT=k<0?null:petOf(tk,k),pB=k<0?null:petOf(bk,k);
+  return {pT:pT===null||pB===null?null:Math.round(pT),pB:pT===null||pB===null?null:Math.round(pB)}}
+async function filmApply(t){const st=filmState(t);
+  if(S.mode!==st.mode){S.mode=st.mode;if(st.mode==="walk")S.fov=72;setModeUI()}
+  if(st.mode==="map")Object.assign(S.map,st.map);else{S.pos=st.pos;S.head=wrap360(st.head);S.pitch=st.pitch}
+  const si=roleIndex(st.scen),ri=roleIndex("base");
+  if(si>=0)S.scen=si;if(ri>=0)S.ref=ri;
+  if(st.layer==="surface"){if(S.ped.on||S.surf!=="tsurf"){S.ped.on=false;S.surf="tsurf";uploadWalls();refreshLayers()}}
+  else if(!S.ped.on||S.ped.layer!==st.layer){S.ped.on=true;S.ped.layer=st.layer;refreshLayers()}
+  markScen();S.tf=tfAt(st.h);await onTime();
+  if(st.sc!==FILM.scene){FILM.scene=st.sc;$("caption").textContent=FILM_CAP[st.sc](filmVals(st))}
+  S.dirty=true}
+function filmCapPos(){const tb=$("tourBar");if(!document.body.classList.contains("film")){tb.style.top="";tb.style.bottom="";return}   // tour captions sit just above the time bar
+  tb.style.top="auto";tb.style.bottom=(innerHeight-$("bottom").getBoundingClientRect().top+10)+"px"}
+function filmUI(on){document.body.classList.toggle("film",on);$("tourBar").style.display=on?"flex":"none";$("tourBtns").style.display=on?"none":"";
+  $("caption").style.display=on?"block":"none";$("filmBtn").innerHTML=on?"&#9632; Stop":"&#9654; Tour";FILM.scene=-1;layout();filmCapPos()}
+async function playFilm(){if(FILM.on){stopFilm();return}if(S.play)togglePlay();FILM.on=true;filmUI(true);
+  let t=0,last=performance.now();
+  while(FILM.on){await filmApply(t);await new Promise(r=>requestAnimationFrame(r));const now=performance.now();t+=Math.min((now-last)/1000,0.1);last=now;
+    if(t>FILM.T){t=0;FILM.scene=-1;FILM.loops=(FILM.loops||0)+1}}}   // loops until Stop, Esc or a touch on the map
+function stopFilm(){FILM.on=false;filmUI(false);setModeUI();refreshLayers();updateCard()}
+
 // ============================================================================ input
 const ptrs=new Map();let drag=null,pinch=null;
 function isRotateDrag(e){return e.button===2||e.ctrlKey||e.metaKey||(e.button===0&&e.altKey)}
-cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});fly=null;
+cv.addEventListener("pointerdown",e=>{if(FILM.on)stopFilm();cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});fly=null;
   if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),mx:(a.x+b.x)/2,my:(a.y+b.y)/2,ang:Math.atan2(b.y-a.y,b.x-a.x)};pinched=true;drag=null;return}
-  drag={x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,t:performance.now(),rot:S.mode==="map"&&isRotateDrag(e),btn:e.button,moved:false};if(!S.pick)cv.classList.add("drag")});
+  drag={x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY,t:performance.now(),rot:S.mode==="map"&&isRotateDrag(e),btn:e.button,moved:false};if(drag.rot)drag.g=groundAt(e.clientX,e.clientY);if(!S.pick)cv.classList.add("drag")});
 cv.addEventListener("pointermove",e=>{if(!ptrs.has(e.pointerId))return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(pinch&&ptrs.size===2){S.dirty=true;return}   // two fingers: evaluated once per frame in pinchStep()
   if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.hypot(e.clientX-drag.x0,e.clientY-drag.y0)>4)drag.moved=true;
-  if(S.mode==="walk"){const k=S.fov/cv.clientHeight;S.head=wrap360(S.head+dx*k);S.pitch=clamp(S.pitch-dy*k,-70,75)}
-  else if(drag.rot){S.map.head=wrap360(S.map.head-dx*0.3);S.map.pitch=clamp(S.map.pitch+dy*0.25,20,89)}
+  if(S.mode==="walk"){const k=S.fov/cv.clientHeight;S.head=wrap360(S.head-dx*k);S.pitch=clamp(S.pitch+dy*k,-70,75)}   // the scene follows the pointer (Street View)
+  else if(drag.rot)rotGrab(drag,e.clientX,e.clientY);
   else panMap(drag.x,drag.y,e.clientX,e.clientY);
   drag.x=e.clientX;drag.y=e.clientY;S.dirty=true});
 // two-finger gesture, evaluated once per animation frame so both fingers have moved:
@@ -911,7 +1013,7 @@ function setupPeg(){const peg=$("peg"),ghost=$("pegGhost");let pd=null;
 addEventListener("keydown",e=>{if(e.target.tagName==="SELECT")return;S.keys[e.code]=true;
   if(e.code==="Space"){e.preventDefault();togglePlay()}
   if(e.code==="KeyT"){S.scen=(S.scen+1)%S.man.scenarios.length;refreshScen()}
-  if(e.code==="Escape"){if($("layersPop").style.display==="block")setLayers(false);else if(S.pick)setPick(false);else if($("help").style.display==="block")showHelp(false);
+  if(e.code==="Escape"){if(FILM.on)stopFilm();else if($("layersPop").style.display==="block")setLayers(false);else if(S.pick)setPick(false);else if($("help").style.display==="block")showHelp(false);
     else if($("about").style.display==="flex")$("about").style.display="none";else toMap()}
   if(S.mode==="map"&&(e.key==="+"||e.key==="="))zoomBtn(0.7);if(S.mode==="map"&&(e.key==="-"||e.key==="_"))zoomBtn(1/0.7);
   if(e.code.startsWith("Arrow"))e.preventDefault()});
@@ -940,7 +1042,7 @@ function step(now){const dt=window.__fixedDt||Math.min((now-lastT)/1000,0.1);/* 
     if(tween.k==="zoom"){zoomMapAt(tween.x,tween.y,Math.pow(0.5,dt/0.35))}
     else{const v=tween.from>180?lerp(tween.from,360,smooth(0,1,tween.t)):lerp(tween.from,0,smooth(0,1,tween.t));if(tween.k==="head")S.head=wrap360(v);else S.map.head=wrap360(v)}
     if(tween.t>=1)tween=null;S.dirty=true}
-  if(S.play){playAcc+=dt;if(playAcc>0.05){S.tf+=playAcc*1.2;playAcc=0;if(S.tf>=S.man.times.length-1){S.tf=S.man.times.length-1;togglePlay()}onTime()}}
+  if(S.play){playAcc+=dt;if(playAcc>0.05){S.tf+=playAcc*1.2;playAcc=0;if(S.tf>S.man.times.length-1)S.tf=0;onTime()}}   // the day plays on a loop until paused
   cardAcc+=dt;if(S.dirty&&cardAcc>0.15&&S.mode==="walk"){cardAcc=0;updateCard()}
   windStep(dt);
   if(S.dirty&&cur.ready){render();drawMini();placePin();$("compSvg").style.transform=`rotate(${-(S.mode==="walk"?S.head:S.map.head)}deg)`;S.dirty=false}
@@ -990,10 +1092,11 @@ function render(){const c=camera(),sun=sunNow(),sk=skyCols(sun.elev),g=S.man.gri
   gl.bindVertexArray(vaoG);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
   gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.useProgram(BLDG.p);common(BLDG);surfU(BLDG,!S.ped.on);gl.bindVertexArray(vaoB);gl.drawElements(gl.TRIANGLES,nIdxB,gl.UNSIGNED_INT,0);
   if(S.man.scenarios[S.scen].trees){gl.useProgram(TREE.p);common(TREE);gl.uniform1f(TREE.u.u_part,0);gl.bindVertexArray(vaoT);gl.drawElementsInstanced(gl.TRIANGLES,crownN,gl.UNSIGNED_SHORT,0,nT);
-    gl.disable(gl.CULL_FACE);gl.uniform1f(TREE.u.u_part,1);gl.bindVertexArray(vaoTr);gl.drawElementsInstanced(gl.TRIANGLES,trunkN,gl.UNSIGNED_SHORT,0,nT)}
+    gl.disable(gl.CULL_FACE);gl.uniform1f(TREE.u.u_part,1);gl.bindVertexArray(vaoTr);gl.drawElementsInstanced(gl.TRIANGLES,trunkN,gl.UNSIGNED_SHORT,0,nT);
+    gl.uniform1f(TREE.u.u_part,2);for(let L=0;L<3;L++){gl.uniform1f(TREE.u.u_limb,L);gl.drawElementsInstanced(gl.TRIANGLES,trunkN,gl.UNSIGNED_SHORT,0,nT)}}
   if(S.ped.on){gl.disable(gl.CULL_FACE);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
     gl.useProgram(PEDP.p);common(PEDP);
-    bindTex(0,cur.A0.tex,PEDP,"u_A0");bindTex(1,cur.A1.tex,PEDP,"u_A1");bindTex(2,cur.B0.tex,PEDP,"u_B0");bindTex(3,cur.B1.tex,PEDP,"u_B1");
+    bindTex(0,(P.diff&&cur.D0?cur.D0:cur.A0).tex,PEDP,"u_A0");bindTex(1,(P.diff&&cur.D1?cur.D1:cur.A1).tex,PEDP,"u_A1");bindTex(2,cur.B0.tex,PEDP,"u_B0");bindTex(3,cur.B1.tex,PEDP,"u_B1");
     bindTex(4,cur.R0.tex,PEDP,"u_R0");bindTex(5,cur.R1.tex,PEDP,"u_R1");bindTex(6,stTex,PEDP,"u_st");bindTex(8,lutP,PEDP,"u_lutP");
     gl.uniform1f(PEDP.u.u_mix,cur.w);gl.uniform1f(PEDP.u.u_alpha,S.ped.alpha);gl.uniform1f(PEDP.u.u_src,P.src);gl.uniform1f(PEDP.u.u_ch,P.ch);gl.uniform1f(PEDP.u.u_diff,P.diff?1:0);
     gl.uniform2f(PEDP.u.u_q,qp[0],qp[1]);gl.uniform2f(PEDP.u.u_disp,P.lo,P.hi);gl.bindVertexArray(vaoP);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
@@ -1024,21 +1127,8 @@ function render(){const c=camera(),sun=sunNow(),sk=skyCols(sun.elev),g=S.man.gri
     // autoplay: start now, or when a start-up notice (public copy) is dismissed
     if(document.getElementById("protoNotice")&&document.getElementById("protoNotice").style.display!=="none")window.__startPlay=()=>{if(!S.play)togglePlay()};
     else if(!S.play)togglePlay();
-    window.V={S,TOUR,enterStreet,toMap,refreshLayers,refreshScen,onTime,updateFrames,zoomMapAt,panMap,groundAt,setPick,bestHeading,uploadWalls,runTour,setUI,showHelp,activeLayer};window.__viewerReady=true;
+    window.V={S,TOUR,filmApply,filmUI,filmState,FILM,enterStreet,toMap,refreshLayers,refreshScen,onTime,updateFrames,zoomMapAt,panMap,groundAt,setPick,bestHeading,uploadWalls,runTour,setUI,showHelp,activeLayer};window.__viewerReady=true;
   }catch(e){err(e.message||String(e));window.__viewerError=String(e)}})();
-</script>
-
-<div id="protoNotice" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(10,14,22,.55)">
-  <div style="max-width:560px;margin:16px;padding:18px 20px;border-radius:12px;background:#1d2330;color:#e9edf3;font:14px/1.55 system-ui,sans-serif">
-    <div style="font-size:16px;font-weight:600;margin-bottom:6px">Prototype</div>
-    <div>Prototype for discussion. It shows a new simulation of 30 July 2026 in the Poblenou superblock with the existing street trees (2026-10 run, after two days of spin-up; the earlier version is published in Yamada et al. 2026, Street Art &amp; Urban Creativity 12(5), <a href="https://doi.org/10.66838/sauc.6427" target="_blank" rel="noopener" style="color:#9cc7ff">doi:10.66838/sauc.6427</a>). Known limits: the street air runs about 4 &deg;C warm at midday compared with street measurements, so the feels-like temperature is likely too high; the open edge of the model area is not shown; the scenarios without trees and with reflective roads are still being computed.</div>
-    <button id="protoOk" class="btn" style="margin-top:12px">Got it</button>
-  </div>
-</div>
-<script>
-(function(){var n=document.getElementById("protoNotice");function done(){n.style.display="none";if(window.__startPlay)window.__startPlay()}
-document.getElementById("protoOk").onclick=done;
-n.onclick=function(e){if(e.target===n)done()};})();
 </script>
 </body>
 </html>
