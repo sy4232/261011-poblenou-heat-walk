@@ -812,9 +812,7 @@ function updateCard(){if(!S.man)return;const card=$("infoCard"),p=cardPoint();
   const sunTxt=sunNow().elev<=0?"night":(s.sun>0.6?"in the sun":(s.sun>0.03?"under trees":"in shade"));
   $("infoBig").textContent=s.pet.toFixed(1)+" °C";const c=$("infoCls");c.style.display="inline-block";c.textContent=petClass(s.pet);c.style.background=classColor(s.pet);
   $("infoSub").textContent=`feels-like temperature (PET) · ${sunTxt}`;
-  let h="";for(const o of S.man.scenarios){if(o.key===sk.key)continue;const v=petOf(o.key,s.k);if(v===null)continue;const dd=v-s.pet;
-    h+=`<div>${cmpName(o)}: ${v.toFixed(1)} °C <span class="${dd>0.05?'warm':(dd<-0.05?'cool':'')}">(${diffText(dd)})</span></div>`}
-  $("infoCmp").innerHTML=h;
+  $("infoCmp").innerHTML="";   // the "x °C cooler/hotter without trees" line is dropped (advisor, 2026-10-26); the chart carries the comparison
   const ik=k=>inletAt(k),ic=(v,f)=>v===null?'<td class="ip">–</td>':`<td class="ip">${f(v)}</td>`,hasI=!!S.man.inlet;
   $("infoTab").innerHTML=(hasI?`<tr class="th"><td></td><td>Here</td><td class="ip" title="${S.man.inlet.note}">El Prat*</td></tr>`:"")+
    `<tr><td>Air temperature</td><td>${s.tair.toFixed(1)} °C</td>${hasI?ic(ik("ta"),v=>v.toFixed(1)+" °C"):""}</tr>`+
@@ -845,10 +843,12 @@ function drawChart(){const c=$("chart"),x=c.getContext("2d"),W=c.width,H=c.heigh
   x.font="10px system-ui";x.fillStyle="#aab3c2";x.strokeStyle="rgba(255,255,255,.12)";
   for(let v=lo;v<=hi+1e-9;v+=stp){x.beginPath();x.moveTo(L.l,Y(v));x.lineTo(W-L.r,Y(v));x.stroke();x.fillText((stp<1?v.toFixed(1):Math.round(v))+D.u,3,Y(v)+3)}
   for(let h=Math.ceil(t0/3)*3;h<=t1;h+=3)x.fillText(String(h).padStart(2,"0")+"h",X(h)-9,H-5);
-  const cols=["#ff8a5c","#6fd3a0","#7fb2ff","#e9d16b"];
-  m.scenarios.forEach((s,i)=>{const v=ser(s);x.strokeStyle=cols[i%4];x.lineWidth=i===S.scen?2.6:1.4;x.beginPath();let st=false;v.forEach((y,k)=>{if(!isFinite(y)||k>=t.length){st=false;return}st?x.lineTo(X(t[k]),Y(y)):x.moveTo(X(t[k]),Y(y));st=true});x.stroke();x.fillStyle=cols[i%4];x.fillText(shortName(s).replace(/^\+ /,""),L.l+4,L.t+10+12*i)});
-  if(iser&&pt){x.save();x.setLineDash([4,3]);x.strokeStyle="#c9d1de";x.lineWidth=1.4;x.beginPath();iser.forEach((y,k)=>{k?x.lineTo(X(m.times[k]),Y(y)):x.moveTo(X(m.times[k]),Y(y))});x.stroke();x.restore();
-    x.fillStyle="#c9d1de";x.fillText("El Prat (inflow)"+(cvv==="wind"?", 10 m":""),L.l+4,L.t+10+12*m.scenarios.length)}
+  // lines differ by width and dash, not colour: with trees = thick, no trees = thin, El Prat = dashed, anything else = dotted
+  const LC="#e6ebf2",lsty=s=>/^(veg|itree)$/.test(s.key)?{w:3,d:[]}:(/^(nonveg|bare)$/.test(s.key)?{w:1.2,d:[]}:{w:1.6,d:[1.5,3]});
+  const key=(st,lab,row)=>{const yy=L.t+7+12*row;x.save();x.strokeStyle=LC;x.lineWidth=st.w;x.setLineDash(st.d);x.beginPath();x.moveTo(L.l+4,yy);x.lineTo(L.l+22,yy);x.stroke();x.restore();x.fillStyle=LC;x.fillText(lab,L.l+26,yy+3)};
+  m.scenarios.forEach((s,i)=>{const v=ser(s),st=lsty(s);x.save();x.strokeStyle=LC;x.lineWidth=st.w;x.setLineDash(st.d);x.beginPath();let on=false;v.forEach((y,k)=>{if(!isFinite(y)||k>=t.length){on=false;return}on?x.lineTo(X(t[k]),Y(y)):x.moveTo(X(t[k]),Y(y));on=true});x.stroke();x.restore();key(st,shortName(s).replace(/^\+ /,""),i)});
+  if(iser&&pt){const st={w:1.4,d:[5,3]};x.save();x.setLineDash(st.d);x.strokeStyle=LC;x.lineWidth=st.w;x.beginPath();iser.forEach((y,k)=>{k?x.lineTo(X(m.times[k]),Y(y)):x.moveTo(X(m.times[k]),Y(y))});x.stroke();x.restore();
+    key(st,"El Prat (inflow)"+(cvv==="wind"?", 10 m":""),m.scenarios.length)}
   const th=timeHour();x.strokeStyle="#fff";x.lineWidth=1;x.beginPath();x.moveTo(X(th),L.t);x.lineTo(X(th),H-L.b);x.stroke();
   const cs=m.curves[keyOf(S.scen)],k=Math.round(clamp(S.tf,0,t.length-1));
   const vn=cvv==="surface"?"Surface temperature":(cvv==="dpet"?PED.pet.name:PED[cvv].name),un=cvv==="surface"||D.u==="°"?" (°C)":(cvv==="wind"?" (m/s)":(cvv==="rh"?" (%)":""));
