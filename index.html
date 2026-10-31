@@ -430,8 +430,7 @@ void main(){
  if(u_photo>0.5){ vec2 ou=vec2((w.x-u_orect.x)/(u_orect.z-u_orect.x),(u_orect.w-w.y)/(u_orect.w-u_orect.y)); if(inside(ou)) base=texture(u_ph,ou).rgb; }
  vec3 col;
  if(inG){
-   float sun=mix(texture(u_B0,uv),texture(u_B1,uv),u_mix).g;
-   col=base*(0.30+0.70*u_day)*mix(1.0,mix(0.55,1.0,sun),u_day);
+   col=base*(0.30+0.70*u_day);   // no cast shadows on the ground (advisor, 2026-10-31); the "Sun and shade" layer shows them
    if(u_sOn>0.5){ float v=u_sq.x+pickc(mix(mbil(u_C0,u_st,uv,1.0),mbil(u_C1,u_st,uv,1.0),u_smix),u_sch)*(u_sq.y-u_sq.x);
      vec3 dc=texture(u_lutS,vec2(clamp((v-u_sdisp.x)/(u_sdisp.y-u_sdisp.x),0.0,1.0),0.5)).rgb;
      col=mix(col,dc*(0.85+0.15*u_day),0.92); }
