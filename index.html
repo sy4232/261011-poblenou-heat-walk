@@ -285,7 +285,7 @@ body.phone.tour #infoCmp{font-size:13.5px} body.phone.tour #clock{font-size:17px
     <li>Click any point on the map to see its numbers. Open <b>Help</b> for the controls.</li>
   </ul>
   <p style="font-size:12.5px">It shows simulations of July 30, 2026 in the Poblenou superblock without street trees and with the existing street trees (October 2026 runs, after two days of spin-up; an earlier version is published in Yamada et al. 2026, Street Art &amp; Urban Creativity 12(5), <a href="https://doi.org/10.66838/sauc.6427" target="_blank" rel="noopener" style="color:#9cc7ff">doi:10.66838/sauc.6427</a>). Known limits: the street air runs about 4 &deg;C warm at midday compared with street measurements, so the feels-like temperature is likely too high; the open edge of the model area is not shown.</p>
-  <p style="color:var(--mute);font-size:12px">Data sources: aerial photo &copy; Institut Cartogr&agrave;fic i Geol&ograve;gic de Catalunya (ICGC), ortofoto 25 cm 2025; street trees: Ajuntament de Barcelona, Open Data BCN (Arbrat viari, Arbrat zona); building footprints: Direcci&oacute;n General del Catastro; weather forcing: Servei Meteorol&ograve;gic de Catalunya (Meteocat). Simulation and viewer: NYU, UPC and Hochschule Mainz.</p>
+  <p style="color:var(--mute);font-size:12px">Data sources: street trees: Ajuntament de Barcelona, Open Data BCN (Arbrat viari, Arbrat zona); building footprints: Direcci&oacute;n General del Catastro; weather forcing: Servei Meteorol&ograve;gic de Catalunya (Meteocat). Simulation and viewer: NYU, UPC and Hochschule Mainz.</p>
   <p style="color:var(--mute);font-size:12.5px" id="tech"></p>
   <button class="btn" id="aboutClose">Close</button>
 </div></div>
@@ -366,7 +366,7 @@ const PED={
     stops:[[0,"#2166ac"],[.525,"#92c5de"],[.75,"#f4f4f4"],[.825,"#f4a582"],[1,"#b2182b"]]}
 };
 const SURF={
-  none:{chip:"Photo",name:"",off:true,ch:0,q:"tsurf",lo:0,hi:1,stops:[[0,"#000000"],[1,"#ffffff"]]},
+  none:{chip:"Plain",name:"",off:true,ch:0,q:"tsurf",lo:0,hi:1,stops:[[0,"#000000"],[1,"#ffffff"]]},
   tsurf:{short:"Surface temp.",chip:"Surface temperature",name:"Surface temperature (ground, walls, roofs)",plain:"Surface temperature",unit:"°C",ch:0,q:"tsurf",lo:20,hi:60,stops:HEAT,wall:"wallT"},
   solar:{short:"Sunlight",chip:"Sunlight",name:"Sunlight on surfaces",unit:"W/m²",ch:1,q:"solar",lo:0,hi:900,stops:[[0,"#1b2033"],[.3,"#6a3d8f"],[.65,"#f08a3a"],[1,"#fff1b8"]],wall:"wallS"}
 };
@@ -1114,7 +1114,8 @@ function render(){const c=camera(),sun=sunNow(),sk=skyCols(sun.elev),g=S.man.gri
     const qs=location.search,wantLite=!window.EXPO_INLINE&&!/[?&]full\b/.test(qs)&&(isPhone()||/[?&]lite\b/.test(qs));let dir="data/";
     if(wantLite){try{const full=EXPO.manifest;await loadScript("data_lite/manifest.js");if(EXPO.manifest&&EXPO.manifest!==full&&EXPO.manifest.lite){dir="data_lite/";S.man=EXPO.manifest}}catch(e){}}
     S.dataDir=dir;
-    const files=["data/geometry.js","data/ortho.js",...S.man.scenarios.map(s=>`${dir}frames_${s.key}.js`)];
+    // no aerial photo on the ground (advisor, 2026-10-31): ortho.js is not loaded, so the ground is drawn plain
+    const files=["data/geometry.js",...S.man.scenarios.map(s=>`${dir}frames_${s.key}.js`)];
     let n=0;if(!window.EXPO_INLINE)for(const f of files){try{await loadScript(f)}catch(e){if(!f.includes("ortho"))throw e}n++;$("lbar").style.width=(n/files.length*80)+"%"}
     if(!EXPO.frames[S.man.scenarios[0].key].imgC)throw new Error("The data files are from an older converter version. Re-run scripts/build_viz_data.py.");
     lutP=tex(256,1,buildLUT(HEAT));lutS=tex(256,1,buildLUT(HEAT));
